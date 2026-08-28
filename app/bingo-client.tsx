@@ -53,6 +53,10 @@ type Translation = {
   markRemoved: (number: number) => string;
   importSuccess: (count: number) => string;
   invalidJson: string;
+  pasteJsonLabel: string;
+  pasteJsonHint: string;
+  loadTextJson: string;
+  emptyTextJson: string;
 };
 
 const columns = ['B', 'I', 'N', 'G', 'O'];
@@ -116,6 +120,10 @@ const translations: Record<Locale, Translation> = {
     markRemoved: (number) => `Marcação do número ${number} removida.`,
     importSuccess: (count) => `${count} ${count === 1 ? 'cartela carregada' : 'cartelas carregadas'} e salvas neste navegador por 24 horas.`,
     invalidJson: 'JSON inválido. Use de 1 a 4 cartelas no formato esperado.',
+    pasteJsonLabel: 'Cole ou digite as cartelas em JSON',
+    pasteJsonHint: 'Use o exemplo exibido no campo. Você pode carregar até 4 cartelas.',
+    loadTextJson: 'Carregar texto',
+    emptyTextJson: 'Cole ou digite um JSON antes de carregar.',
   },
   es: {
     brandLabel: 'Marcador de bingo',
@@ -161,6 +169,10 @@ const translations: Record<Locale, Translation> = {
     markRemoved: (number) => `Se eliminó la marca del número ${number}.`,
     importSuccess: (count) => `${count} ${count === 1 ? 'cartón cargado' : 'cartones cargados'} y guardados en este navegador durante 24 horas.`,
     invalidJson: 'JSON no válido. Usa de 1 a 4 cartones con el formato esperado.',
+    pasteJsonLabel: 'Pega o escribe los cartones en JSON',
+    pasteJsonHint: 'Usa el ejemplo mostrado en el campo. Puedes cargar hasta 4 cartones.',
+    loadTextJson: 'Cargar texto',
+    emptyTextJson: 'Pega o escribe un JSON antes de cargarlo.',
   },
   en: {
     brandLabel: 'Bingo marker',
@@ -206,8 +218,37 @@ const translations: Record<Locale, Translation> = {
     markRemoved: (number) => `Mark for number ${number} removed.`,
     importSuccess: (count) => `${count} ${count === 1 ? 'card' : 'cards'} loaded and saved in this browser for 24 hours.`,
     invalidJson: 'Invalid JSON. Use 1 to 4 cards in the expected format.',
+    pasteJsonLabel: 'Paste or type cards as JSON',
+    pasteJsonHint: 'Use the example shown in the field. You can load up to 4 cards.',
+    loadTextJson: 'Load text',
+    emptyTextJson: 'Paste or type JSON before loading.',
   },
 };
+
+const cardsJsonExample = `{
+  "cards": [
+    {
+      "title": "037",
+      "numbers": [
+        [1, 17, 41, 54, 64],
+        [15, 25, 35, 56, 74],
+        [11, 20, null, 60, 75],
+        [4, 21, 36, 49, 65],
+        [7, 26, 44, 53, 63]
+      ]
+    },
+    {
+      "title": "056",
+      "numbers": [
+        [14, 26, 39, 58, 64],
+        [15, 20, 44, 55, 69],
+        [9, 30, null, 47, 68],
+        [10, 16, 42, 59, 73],
+        [1, 24, 33, 51, 72]
+      ]
+    }
+  ]
+}`;
 
 function isValidCard(value: unknown): value is BingoCard {
   if (!value || typeof value !== 'object') return false;
@@ -297,6 +338,7 @@ export default function Home() {
   const [cards, setCards] = useState<BingoCard[] | null>(null);
   const [calledNumbers, setCalledNumbers] = useState<Set<number>>(new Set());
   const [numberInput, setNumberInput] = useState('');
+  const [cardsJsonInput, setCardsJsonInput] = useState('');
   const [notice, setNotice] = useState<Notice>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [locale, setLocale] = useState<Locale>('pt-BR');
@@ -437,6 +479,26 @@ export default function Home() {
     }
   }
 
+  function loadJsonText() {
+    if (!cardsJsonInput.trim()) {
+      setNotice({ type: 'error', text: t.emptyTextJson });
+      return;
+    }
+    try {
+      const importedCards = getCards(JSON.parse(cardsJsonInput) as unknown);
+      if (!importedCards) throw new Error('invalid-cards');
+      const next = new Set<number>();
+      setCards(importedCards);
+      setCalledNumbers(next);
+      persistGame(importedCards, next);
+      setNotice({ type: 'info', text: t.importSuccess(importedCards.length) });
+      setCardsJsonInput('');
+    } catch {
+      setNotice({ type: 'error', text: t.invalidJson });
+    }
+    inputRef.current?.focus();
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -507,6 +569,14 @@ export default function Home() {
           <div className="recent-section"><div className="recent-heading"><h3>{t.marked}</h3><button type="button" onClick={() => setShowHistory((value) => !value)} disabled={!sortedCalledNumbers.length}>{showHistory ? t.collapse : t.showAll}</button></div>{sortedCalledNumbers.length ? <div className={`number-history${showHistory ? ' expanded' : ''}`}>{sortedCalledNumbers.map((number, index) => <span className={index === 0 ? 'latest' : ''} key={number}>{number}</span>)}</div> : <p className="empty-history">{t.noMarkedNumbers}</p>}</div>
           <div className="panel-actions"><button type="button" onClick={undoLast} disabled={!calledNumbers.size}>{t.undoLast}</button><button type="button" onClick={clearMarks} disabled={!calledNumbers.size}>{t.clearMarks}</button></div>
           <div className="json-loader"><div><strong>{canMark ? t.otherCards : t.letsStart}</strong><span>{canMark ? <>{t.savedForOneDay} <a href="./cartelas.json" download>{t.downloadDefault}</a></> : t.uploadCardsHint}</span></div><button type="button" onClick={() => fileRef.current?.click()}>{t.loadJson}</button><input ref={fileRef} type="file" accept="application/json,.json" onChange={loadJson} hidden /></div>
+          <section className="json-text-loader">
+            <label htmlFor="cards-json-text">{t.pasteJsonLabel}</label>
+            <textarea id="cards-json-text" value={cardsJsonInput} onChange={(event) => setCardsJsonInput(event.target.value)} placeholder={cardsJsonExample} aria-describedby="cards-json-hint" spellCheck="false" />
+            <div className="json-text-actions">
+              <span id="cards-json-hint">{t.pasteJsonHint}</span>
+              <button type="button" onClick={loadJsonText}>{t.loadTextJson}</button>
+            </div>
+          </section>
         </aside>
       </div>
     </main>

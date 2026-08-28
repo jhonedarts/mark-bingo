@@ -516,3 +516,53 @@ button { cursor: pointer; }
   .bingo-card, .control-panel { padding: 17px; border-radius: 16px; }
   .input-row { grid-template-columns: 1fr 85px; }
 }
+
+.json-text-loader {
+  grid-column: 1 / -1;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #39344f;
+}
+.json-text-loader label {
+  display: block;
+  margin-bottom: 8px;
+  color: #c8c4d6;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+.json-text-loader textarea {
+  width: 100%;
+  min-height: 210px;
+  display: block;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #4b4663;
+  border-radius: 10px;
+  outline: none;
+  color: #e6e3f0;
+  background: #2a2642;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+.json-text-loader textarea::placeholder { color: #8e88a4; opacity: 0.8; }
+.json-text-loader textarea:focus { border-color: #b759f1; box-shadow: 0 0 0 4px rgba(183, 89, 241, 0.14); }
+.json-text-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 9px; }
+.json-text-actions span { color: #827d95; font-size: 0.62rem; line-height: 1.4; }
+.json-text-actions button {
+  min-height: 35px;
+  flex: none;
+  padding: 0 11px;
+  border: 1px solid #604d8a;
+  border-radius: 8px;
+  color: #bc9dff;
+  background: transparent;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+.json-text-actions button:hover { border-color: #7c709f; color: white; }
+
+@media (max-width: 430px) {
+  .json-text-actions { align-items: flex-start; flex-direction: column; }
+}
