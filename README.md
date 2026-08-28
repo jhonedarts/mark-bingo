@@ -40,5 +40,3 @@ O JSON deve conter de uma a quatro cartelas; `null` representa o espaço livre c
 ## GitHub Pages
 
 O workflow em `.github/workflows/deploy-pages.yml` publica automaticamente quando houver push para `main`.
-
-No repositório do GitHub, selecione **Settings → Pages → Build and deployment → GitHub Actions** uma única vez.
