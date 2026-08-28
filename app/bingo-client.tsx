@@ -569,14 +569,16 @@ export default function Home() {
           <div className="recent-section"><div className="recent-heading"><h3>{t.marked}</h3><button type="button" onClick={() => setShowHistory((value) => !value)} disabled={!sortedCalledNumbers.length}>{showHistory ? t.collapse : t.showAll}</button></div>{sortedCalledNumbers.length ? <div className={`number-history${showHistory ? ' expanded' : ''}`}>{sortedCalledNumbers.map((number, index) => <span className={index === 0 ? 'latest' : ''} key={number}>{number}</span>)}</div> : <p className="empty-history">{t.noMarkedNumbers}</p>}</div>
           <div className="panel-actions"><button type="button" onClick={undoLast} disabled={!calledNumbers.size}>{t.undoLast}</button><button type="button" onClick={clearMarks} disabled={!calledNumbers.size}>{t.clearMarks}</button></div>
           <div className="json-loader"><div><strong>{canMark ? t.otherCards : t.letsStart}</strong><span>{canMark ? <>{t.savedForOneDay} <a href="./cartelas.json" download>{t.downloadDefault}</a></> : t.uploadCardsHint}</span></div><button type="button" onClick={() => fileRef.current?.click()}>{t.loadJson}</button><input ref={fileRef} type="file" accept="application/json,.json" onChange={loadJson} hidden /></div>
-          <section className="json-text-loader">
-            <label htmlFor="cards-json-text">{t.pasteJsonLabel}</label>
-            <textarea id="cards-json-text" value={cardsJsonInput} onChange={(event) => setCardsJsonInput(event.target.value)} placeholder={cardsJsonExample} aria-describedby="cards-json-hint" spellCheck="false" />
-            <div className="json-text-actions">
-              <span id="cards-json-hint">{t.pasteJsonHint}</span>
-              <button type="button" onClick={loadJsonText}>{t.loadTextJson}</button>
-            </div>
-          </section>
+          {activeCards.length === 0 ?
+            <section className="json-text-loader">
+              <label htmlFor="cards-json-text">{t.pasteJsonLabel}</label>
+              <textarea id="cards-json-text" value={cardsJsonInput} onChange={(event) => setCardsJsonInput(event.target.value)} placeholder={cardsJsonExample} aria-describedby="cards-json-hint" spellCheck="false" />
+              <div className="json-text-actions">
+                <span id="cards-json-hint">{t.pasteJsonHint}</span>
+                <button type="button" onClick={loadJsonText}>{t.loadTextJson}</button>
+              </div>
+            </section>
+            : null}
         </aside>
       </div>
     </main>
