@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vinext dev",
-    "build": "vinext build",
+    "build": "vinext build && node scripts/copy-pages-assets.mjs",
     "start": "vinext dev",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
   },

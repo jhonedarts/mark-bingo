@@ -36,4 +36,3 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
-/public/marcacoes.json

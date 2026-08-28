@@ -1,8 +1,8 @@
 # Marca Bingo
 
-Aplicativo local para acompanhar de uma a quatro cartelas de bingo.
+Aplicativo estático para acompanhar de uma a quatro cartelas de bingo. Está preparado para publicar no GitHub Pages.
 
-## Executar
+## Desenvolvimento local
 
 Requer Node.js 22.13 ou superior e npm.
 
@@ -11,11 +11,14 @@ npm install
 npm run dev
 ```
 
-Abra `http://localhost:3000` no navegador.
+## Cartelas e persistência
 
-## Carregar outras cartelas
+- As cartelas padrão são lidas de `public/cartelas.json`.
+- Se esse arquivo não existir, a interface solicita o carregamento de um JSON.
+- Cartelas importadas e marcações são salvas no `localStorage` do navegador por 24 horas.
+- Ao vencer esse prazo, o app volta a usar `public/cartelas.json`.
 
-Clique em **Carregar JSON** e escolha um arquivo com o formato abaixo. O arquivo pode conter de uma a quatro cartelas; `null` representa o espaço livre central.
+O JSON deve conter de uma a quatro cartelas; `null` representa o espaço livre central.
 
 ```json
 {
@@ -34,9 +37,8 @@ Clique em **Carregar JSON** e escolha um arquivo com o formato abaixo. O arquivo
 }
 ```
 
-## Arquivos locais
+## GitHub Pages
 
-- `public/cartelas.json`: cartelas exibidas ao iniciar o app.
-- `public/marcacoes.json`: números marcados; é criado automaticamente e continua disponível após recarregar a página ou reiniciar o servidor.
+O workflow em `.github/workflows/deploy-pages.yml` publica automaticamente quando houver push para `main`.
 
-Ao usar **Carregar JSON**, o arquivo selecionado substitui `public/cartelas.json` e limpa as marcações anteriores.
+No repositório do GitHub, selecione **Settings → Pages → Build and deployment → GitHub Actions** uma única vez.
