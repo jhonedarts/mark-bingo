@@ -59,6 +59,33 @@ button { cursor: pointer; }
 .brand-mark i:nth-child(5) { transform: translateY(6px); }
 .topbar-meta { gap: 9px; color: #c8c4d6; font-size: 0.77rem; letter-spacing: 0.03em; }
 .topbar-meta strong { margin-left: 4px; color: white; font-size: 0.9rem; }
+ .topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+ }
+ .language-switch {
+  min-width: 51px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+ }
+ .language-switch:hover, .language-switch:focus-visible {
+  border-color: #ffcf32;
+  background: rgba(255, 207, 50, 0.16);
+  outline: none;
+ }
+ .language-switch:active { transform: scale(0.96); }
 .live-dot {
   width: 7px;
   height: 7px;

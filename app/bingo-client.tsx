@@ -6,10 +6,208 @@ type CellValue = number | null;
 type BingoCard = { title: string; numbers: CellValue[][] };
 type Notice = { type: 'error' | 'info'; text: string } | null;
 type SavedGame = { expiresAt: number; cards: BingoCard[]; calledNumbers: number[] };
+type Locale = 'pt-BR' | 'es' | 'en';
+type SavedLocale = { expiresAt: number; locale: Locale };
+
+type Translation = {
+  brandLabel: string;
+  cardsInPlay: string;
+  changeLanguage: (language: string) => string;
+  cardComplete: (title: string) => string;
+  cardsComplete: (count: number) => string;
+  cardsPanelLabel: string;
+  liveTracking: string;
+  yourCards: string;
+  markedCount: (count: number) => string;
+  loadingCards: string;
+  noCards: string;
+  noCardsHint: string;
+  loadJson: string;
+  card: string;
+  freeSpace: string;
+  numberCell: (number: number, marked: boolean) => string;
+  controlPanelLabel: string;
+  marker: string;
+  whichNumber: string;
+  markInstruction: string;
+  loadInstruction: string;
+  calledNumber: string;
+  confirmNumber: string;
+  mark: string;
+  marked: string;
+  collapse: string;
+  showAll: string;
+  noMarkedNumbers: string;
+  undoLast: string;
+  clearMarks: string;
+  otherCards: string;
+  letsStart: string;
+  savedForOneDay: string;
+  downloadDefault: string;
+  uploadCardsHint: string;
+  storageError: string;
+  missingCardsError: string;
+  loadBeforeMarking: string;
+  invalidNumber: string;
+  absentNumber: (number: number) => string;
+  markRemoved: (number: number) => string;
+  importSuccess: (count: number) => string;
+  invalidJson: string;
+};
 
 const columns = ['B', 'I', 'N', 'G', 'O'];
 const storageKey = 'marca-bingo:game:v1';
+const localeStorageKey = 'marca-bingo:locale:v1';
 const storageDuration = 24 * 60 * 60 * 1000;
+const localeOrder: Locale[] = ['pt-BR', 'es', 'en'];
+const localeNames: Record<Locale, string> = {
+  'pt-BR': 'Português',
+  es: 'Español',
+  en: 'English',
+};
+const localeShortNames: Record<Locale, string> = {
+  'pt-BR': 'PT',
+  es: 'ES',
+  en: 'EN',
+};
+
+const translations: Record<Locale, Translation> = {
+  'pt-BR': {
+    brandLabel: 'Marcador de bingo',
+    cardsInPlay: 'Cartelas em jogo',
+    changeLanguage: (language) => `Alterar idioma para ${language}`,
+    cardComplete: (title) => `Cartela ${title} completa`,
+    cardsComplete: (count) => `${count} cartelas completas`,
+    cardsPanelLabel: 'Cartelas de bingo',
+    liveTracking: 'ACOMPANHAMENTO AO VIVO',
+    yourCards: 'Suas cartelas',
+    markedCount: (count) => `${count} números marcados`,
+    loadingCards: 'Carregando cartelas…',
+    noCards: 'Nenhuma cartela encontrada',
+    noCardsHint: 'Adicione public/cartelas.json ao projeto ou carregue um arquivo JSON abaixo.',
+    loadJson: 'Carregar JSON',
+    card: 'CARTELA',
+    freeSpace: 'Espaço livre',
+    numberCell: (number, marked) => `Número ${number}${marked ? ', marcado' : ''}`,
+    controlPanelLabel: 'Painel de marcação',
+    marker: 'MARCADOR',
+    whichNumber: 'Qual número saiu?',
+    markInstruction: 'Digite o número e pressione Enter.',
+    loadInstruction: 'Carregue uma cartela para habilitar a marcação.',
+    calledNumber: 'Número sorteado',
+    confirmNumber: 'Confirmar número',
+    mark: 'Marcar',
+    marked: 'Marcados',
+    collapse: 'Recolher',
+    showAll: 'Ver todos',
+    noMarkedNumbers: 'Nenhum número marcado ainda.',
+    undoLast: 'Desfazer último',
+    clearMarks: 'Limpar marcações',
+    otherCards: 'Outras cartelas?',
+    letsStart: 'Vamos começar?',
+    savedForOneDay: 'Dados salvos por 24 horas.',
+    downloadDefault: 'Baixar padrão',
+    uploadCardsHint: 'Carregue um JSON com até 4 cartelas.',
+    storageError: 'Não foi possível salvar os dados neste navegador.',
+    missingCardsError: 'Nenhuma cartela foi encontrada em public/cartelas.json. Carregue um JSON para começar.',
+    loadBeforeMarking: 'Carregue as cartelas antes de marcar números.',
+    invalidNumber: 'Digite um número inteiro de 1 a 75.',
+    absentNumber: (number) => `O número ${number} não está nestas cartelas.`,
+    markRemoved: (number) => `Marcação do número ${number} removida.`,
+    importSuccess: (count) => `${count} ${count === 1 ? 'cartela carregada' : 'cartelas carregadas'} e salvas neste navegador por 24 horas.`,
+    invalidJson: 'JSON inválido. Use de 1 a 4 cartelas no formato esperado.',
+  },
+  es: {
+    brandLabel: 'Marcador de bingo',
+    cardsInPlay: 'Cartones en juego',
+    changeLanguage: (language) => `Cambiar idioma a ${language}`,
+    cardComplete: (title) => `Cartón ${title} completo`,
+    cardsComplete: (count) => `${count} cartones completos`,
+    cardsPanelLabel: 'Cartones de bingo',
+    liveTracking: 'SEGUIMIENTO EN VIVO',
+    yourCards: 'Tus cartones',
+    markedCount: (count) => `${count} números marcados`,
+    loadingCards: 'Cargando cartones…',
+    noCards: 'No se encontraron cartones',
+    noCardsHint: 'Añade public/cartelas.json al proyecto o carga un archivo JSON a continuación.',
+    loadJson: 'Cargar JSON',
+    card: 'CARTÓN',
+    freeSpace: 'Espacio libre',
+    numberCell: (number, marked) => `Número ${number}${marked ? ', marcado' : ''}`,
+    controlPanelLabel: 'Panel de marcado',
+    marker: 'MARCADOR',
+    whichNumber: '¿Qué número salió?',
+    markInstruction: 'Escribe el número y presiona Enter.',
+    loadInstruction: 'Carga un cartón para habilitar el marcado.',
+    calledNumber: 'Número sorteado',
+    confirmNumber: 'Confirmar número',
+    mark: 'Marcar',
+    marked: 'Marcados',
+    collapse: 'Ocultar',
+    showAll: 'Ver todos',
+    noMarkedNumbers: 'Todavía no hay números marcados.',
+    undoLast: 'Deshacer último',
+    clearMarks: 'Borrar marcas',
+    otherCards: '¿Otros cartones?',
+    letsStart: '¿Empezamos?',
+    savedForOneDay: 'Datos guardados durante 24 horas.',
+    downloadDefault: 'Descargar predeterminado',
+    uploadCardsHint: 'Carga un JSON con hasta 4 cartones.',
+    storageError: 'No fue posible guardar los datos en este navegador.',
+    missingCardsError: 'No se encontró ningún cartón en public/cartelas.json. Carga un JSON para empezar.',
+    loadBeforeMarking: 'Carga los cartones antes de marcar números.',
+    invalidNumber: 'Escribe un número entero del 1 al 75.',
+    absentNumber: (number) => `El número ${number} no está en estos cartones.`,
+    markRemoved: (number) => `Se eliminó la marca del número ${number}.`,
+    importSuccess: (count) => `${count} ${count === 1 ? 'cartón cargado' : 'cartones cargados'} y guardados en este navegador durante 24 horas.`,
+    invalidJson: 'JSON no válido. Usa de 1 a 4 cartones con el formato esperado.',
+  },
+  en: {
+    brandLabel: 'Bingo marker',
+    cardsInPlay: 'Cards in play',
+    changeLanguage: (language) => `Change language to ${language}`,
+    cardComplete: (title) => `Card ${title} complete`,
+    cardsComplete: (count) => `${count} cards complete`,
+    cardsPanelLabel: 'Bingo cards',
+    liveTracking: 'LIVE TRACKING',
+    yourCards: 'Your cards',
+    markedCount: (count) => `${count} numbers marked`,
+    loadingCards: 'Loading cards…',
+    noCards: 'No cards found',
+    noCardsHint: 'Add public/cartelas.json to the project or upload a JSON file below.',
+    loadJson: 'Load JSON',
+    card: 'CARD',
+    freeSpace: 'Free space',
+    numberCell: (number, marked) => `Number ${number}${marked ? ', marked' : ''}`,
+    controlPanelLabel: 'Marking panel',
+    marker: 'MARKER',
+    whichNumber: 'What number was called?',
+    markInstruction: 'Enter the number and press Enter.',
+    loadInstruction: 'Load a card to enable marking.',
+    calledNumber: 'Called number',
+    confirmNumber: 'Confirm number',
+    mark: 'Mark',
+    marked: 'Marked',
+    collapse: 'Collapse',
+    showAll: 'Show all',
+    noMarkedNumbers: 'No numbers marked yet.',
+    undoLast: 'Undo last',
+    clearMarks: 'Clear marks',
+    otherCards: 'Other cards?',
+    letsStart: 'Ready to start?',
+    savedForOneDay: 'Data saved for 24 hours.',
+    downloadDefault: 'Download default',
+    uploadCardsHint: 'Load a JSON with up to 4 cards.',
+    storageError: 'Unable to save data in this browser.',
+    missingCardsError: 'No cards were found in public/cartelas.json. Load a JSON file to get started.',
+    loadBeforeMarking: 'Load cards before marking numbers.',
+    invalidNumber: 'Enter a whole number from 1 to 75.',
+    absentNumber: (number) => `Number ${number} is not on these cards.`,
+    markRemoved: (number) => `Mark for number ${number} removed.`,
+    importSuccess: (count) => `${count} ${count === 1 ? 'card' : 'cards'} loaded and saved in this browser for 24 hours.`,
+    invalidJson: 'Invalid JSON. Use 1 to 4 cards in the expected format.',
+  },
+};
 
 function isValidCard(value: unknown): value is BingoCard {
   if (!value || typeof value !== 'object') return false;
@@ -75,19 +273,42 @@ function readSavedGame(): SavedGame | null {
   }
 }
 
+function readSavedLocale(): Locale | null {
+  try {
+    const raw = window.localStorage.getItem(localeStorageKey);
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as Partial<SavedLocale>;
+    if (
+      typeof saved.expiresAt !== 'number' ||
+      saved.expiresAt <= Date.now() ||
+      !localeOrder.includes(saved.locale as Locale)
+    ) {
+      window.localStorage.removeItem(localeStorageKey);
+      return null;
+    }
+    return saved.locale as Locale;
+  } catch {
+    window.localStorage.removeItem(localeStorageKey);
+    return null;
+  }
+}
+
 export default function Home() {
   const [cards, setCards] = useState<BingoCard[] | null>(null);
   const [calledNumbers, setCalledNumbers] = useState<Set<number>>(new Set());
   const [numberInput, setNumberInput] = useState('');
   const [notice, setNotice] = useState<Notice>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [locale, setLocale] = useState<Locale>('pt-BR');
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const t = translations[locale];
   const activeCards = cards ?? [];
   const canMark = activeCards.length > 0;
   const winners = activeCards.filter((card) => hasBingo(card, calledNumbers));
   const sortedCalledNumbers = Array.from(calledNumbers).reverse();
+  const nextLocale = localeOrder[(localeOrder.indexOf(locale) + 1) % localeOrder.length];
 
   function persistGame(cardsToSave: BingoCard[], numbersToSave: Set<number>) {
     try {
@@ -100,9 +321,30 @@ export default function Home() {
         }),
       );
     } catch {
-      setNotice({ type: 'error', text: 'Não foi possível salvar os dados neste navegador.' });
+      setNotice({ type: 'error', text: t.storageError });
     }
   }
+
+  function changeLocale() {
+    setLocale(nextLocale);
+    try {
+      window.localStorage.setItem(
+        localeStorageKey,
+        JSON.stringify({ expiresAt: Date.now() + storageDuration, locale: nextLocale }),
+      );
+    } catch {
+      // The interface still changes language when storage is unavailable.
+    }
+  }
+
+  useEffect(() => {
+    const savedLocale = readSavedLocale();
+    if (savedLocale) setLocale(savedLocale);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -127,10 +369,7 @@ export default function Home() {
       } catch {
         if (!isCurrent) return;
         setCards([]);
-        setNotice({
-          type: 'error',
-          text: 'Nenhuma cartela foi encontrada em public/cartelas.json. Carregue um JSON para começar.',
-        });
+        setNotice({ type: 'error', text: translations['pt-BR'].missingCardsError });
       }
     }
 
@@ -141,12 +380,12 @@ export default function Home() {
   function markNumber(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canMark) {
-      setNotice({ type: 'error', text: 'Carregue as cartelas antes de marcar números.' });
+      setNotice({ type: 'error', text: t.loadBeforeMarking });
       return;
     }
     const parsed = Number(numberInput);
     if (!numberInput.trim() || !Number.isInteger(parsed) || parsed < 1 || parsed > 75) {
-      setNotice({ type: 'error', text: 'Digite um número inteiro de 1 a 75.' });
+      setNotice({ type: 'error', text: t.invalidNumber });
       inputRef.current?.focus();
       return;
     }
@@ -155,7 +394,7 @@ export default function Home() {
     next.add(parsed);
     setCalledNumbers(next);
     setNumberInput('');
-    setNotice(appearsOnCard ? null : { type: 'info', text: `O número ${parsed} não está nestas cartelas.` });
+    setNotice(appearsOnCard ? null : { type: 'info', text: t.absentNumber(parsed) });
     persistGame(activeCards, next);
     inputRef.current?.focus();
   }
@@ -166,7 +405,7 @@ export default function Home() {
     const next = new Set(calledNumbers);
     next.delete(lastCalled);
     setCalledNumbers(next);
-    setNotice({ type: 'info', text: `Marcação do número ${lastCalled} removida.` });
+    setNotice({ type: 'info', text: t.markRemoved(lastCalled) });
     persistGame(activeCards, next);
     inputRef.current?.focus();
   }
@@ -189,12 +428,9 @@ export default function Home() {
       setCards(importedCards);
       setCalledNumbers(next);
       persistGame(importedCards, next);
-      setNotice({
-        type: 'info',
-        text: `${importedCards.length} ${importedCards.length === 1 ? 'cartela carregada' : 'cartelas carregadas'} e salvas neste navegador por 24 horas.`,
-      });
+      setNotice({ type: 'info', text: t.importSuccess(importedCards.length) });
     } catch {
-      setNotice({ type: 'error', text: 'JSON inválido. Use de 1 a 4 cartelas no formato esperado.' });
+      setNotice({ type: 'error', text: t.invalidJson });
     } finally {
       event.target.value = '';
       inputRef.current?.focus();
@@ -204,31 +440,36 @@ export default function Home() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div className="brand" aria-label="Marcador de bingo">
+        <div className="brand" aria-label={t.brandLabel}>
           <span className="brand-mark" aria-hidden="true"><i /><i /><i /><i /><i /><i /></span>
           <span className="brand-name">MARCA BINGO</span>
         </div>
-        <div className="topbar-meta"><span className="live-dot" aria-hidden="true" /><span>Cartelas em jogo</span><strong>{activeCards.length.toString().padStart(2, '0')}</strong></div>
+        <div className="topbar-actions">
+          <div className="topbar-meta"><span className="live-dot" aria-hidden="true" /><span>{t.cardsInPlay}</span><strong>{activeCards.length.toString().padStart(2, '0')}</strong></div>
+          <button type="button" className="language-switch" onClick={changeLocale} aria-label={t.changeLanguage(localeNames[nextLocale])} title={t.changeLanguage(localeNames[nextLocale])}>
+            <span aria-hidden="true">◎</span><strong>{localeShortNames[locale]}</strong>
+          </button>
+        </div>
       </header>
 
       {winners.length > 0 && (
         <section className="bingo-alert" role="alert" aria-live="assertive">
           <span aria-hidden="true">★</span>
-          <div><strong>BINGO!</strong><small>{winners.length === 1 ? `Cartela ${winners[0].title} completa` : `${winners.length} cartelas completas`}</small></div>
+          <div><strong>BINGO!</strong><small>{winners.length === 1 ? t.cardComplete(winners[0].title) : t.cardsComplete(winners.length)}</small></div>
           <span aria-hidden="true">★</span>
         </section>
       )}
 
       <div className="workspace">
-        <section className="cards-panel" aria-label="Cartelas de bingo">
-          <div className="section-heading"><div><p>ACOMPANHAMENTO AO VIVO</p><h1>Suas cartelas</h1></div><span>{calledNumbers.size} números marcados</span></div>
+        <section className="cards-panel" aria-label={t.cardsPanelLabel}>
+          <div className="section-heading"><div><p>{t.liveTracking}</p><h1>{t.yourCards}</h1></div><span>{t.markedCount(calledNumbers.size)}</span></div>
           {cards === null ? (
-            <section className="empty-cards" aria-live="polite"><strong>Carregando cartelas…</strong></section>
+            <section className="empty-cards" aria-live="polite"><strong>{t.loadingCards}</strong></section>
           ) : activeCards.length === 0 ? (
             <section className="empty-cards" aria-live="polite">
-              <span aria-hidden="true">↥</span><h2>Nenhuma cartela encontrada</h2>
-              <p>Adicione <code>public/cartelas.json</code> ao projeto ou carregue um arquivo JSON abaixo.</p>
-              <button type="button" onClick={() => fileRef.current?.click()}>Carregar JSON</button>
+              <span aria-hidden="true">↥</span><h2>{t.noCards}</h2>
+              <p>{t.noCardsHint}</p>
+              <button type="button" onClick={() => fileRef.current?.click()}>{t.loadJson}</button>
             </section>
           ) : (
             <div className={`cards-grid cards-${activeCards.length}`}>
@@ -236,15 +477,15 @@ export default function Home() {
                 const winner = hasBingo(card, calledNumbers);
                 return (
                   <article className={`bingo-card${winner ? ' is-winner' : ''}`} key={`${card.title}-${cardIndex}`}>
-                    <div className="card-topline"><div className="mini-brand" aria-hidden="true"><span className="mini-mark">•••</span><span>BINGO</span></div><div className="card-title"><small>CARTELA</small><strong>{card.title}</strong></div></div>
+                    <div className="card-topline"><div className="mini-brand" aria-hidden="true"><span className="mini-mark">•••</span><span>BINGO</span></div><div className="card-title"><small>{t.card}</small><strong>{card.title}</strong></div></div>
                     {winner && <div className="winner-ribbon">BINGO!</div>}
-                    <div className="bingo-table" role="table" aria-label={`Cartela ${card.title}`}>
+                    <div className="bingo-table" role="table" aria-label={`${t.card} ${card.title}`}>
                       <div className="bingo-row bingo-header" role="row">{columns.map((column) => <div role="columnheader" key={column}>{column}</div>)}</div>
                       {card.numbers.map((row, rowIndex) => (
                         <div className="bingo-row" role="row" key={rowIndex}>
                           {row.map((number, columnIndex) => {
                             const marked = number === null || calledNumbers.has(number);
-                            return <div role="cell" className={`${marked ? 'marked' : ''}${number === null ? ' free' : ''}`} key={`${rowIndex}-${columnIndex}`} aria-label={number === null ? 'Espaço livre' : `Número ${number}${marked ? ', marcado' : ''}`}>{number === null ? <span aria-hidden="true">★</span> : number}</div>;
+                            return <div role="cell" className={`${marked ? 'marked' : ''}${number === null ? ' free' : ''}`} key={`${rowIndex}-${columnIndex}`} aria-label={number === null ? t.freeSpace : t.numberCell(number, marked)}>{number === null ? <span aria-hidden="true">★</span> : number}</div>;
                           })}
                         </div>
                       ))}
@@ -256,16 +497,16 @@ export default function Home() {
           )}
         </section>
 
-        <aside className="control-panel" aria-label="Painel de marcação">
-          <div className="control-title"><span>MARCADOR</span><h2>Qual número saiu?</h2><p>{canMark ? 'Digite o número e pressione Enter.' : 'Carregue uma cartela para habilitar a marcação.'}</p></div>
+        <aside className="control-panel" aria-label={t.controlPanelLabel}>
+          <div className="control-title"><span>{t.marker}</span><h2>{t.whichNumber}</h2><p>{canMark ? t.markInstruction : t.loadInstruction}</p></div>
           <form onSubmit={markNumber} className="number-form">
-            <label htmlFor="bingo-number">Número sorteado</label>
-            <div className="input-row"><input ref={inputRef} id="bingo-number" type="number" inputMode="numeric" min="1" max="75" autoComplete="off" placeholder="00" value={numberInput} disabled={!canMark} onChange={(event) => { setNumberInput(event.target.value); setNotice(null); }} /><button type="submit" className="confirm-button" aria-label="Confirmar número" disabled={!canMark}><span>Marcar</span><b aria-hidden="true">→</b></button></div>
+            <label htmlFor="bingo-number">{t.calledNumber}</label>
+            <div className="input-row"><input ref={inputRef} id="bingo-number" type="number" inputMode="numeric" min="1" max="75" autoComplete="off" placeholder="00" value={numberInput} disabled={!canMark} onChange={(event) => { setNumberInput(event.target.value); setNotice(null); }} /><button type="submit" className="confirm-button" aria-label={t.confirmNumber} disabled={!canMark}><span>{t.mark}</span><b aria-hidden="true">→</b></button></div>
           </form>
           {notice && <p className={`notice ${notice.type}`} role="status">{notice.text}</p>}
-          <div className="recent-section"><div className="recent-heading"><h3>Marcados</h3><button type="button" onClick={() => setShowHistory((value) => !value)} disabled={!sortedCalledNumbers.length}>{showHistory ? 'Recolher' : 'Ver todos'}</button></div>{sortedCalledNumbers.length ? <div className={`number-history${showHistory ? ' expanded' : ''}`}>{sortedCalledNumbers.map((number, index) => <span className={index === 0 ? 'latest' : ''} key={number}>{number}</span>)}</div> : <p className="empty-history">Nenhum número marcado ainda.</p>}</div>
-          <div className="panel-actions"><button type="button" onClick={undoLast} disabled={!calledNumbers.size}>Desfazer último</button><button type="button" onClick={clearMarks} disabled={!calledNumbers.size}>Limpar marcações</button></div>
-          <div className="json-loader"><div><strong>{canMark ? 'Outras cartelas?' : 'Vamos começar?'}</strong><span>{canMark ? <>Dados salvos por 24 horas. <a href="./cartelas.json" download>Baixar padrão</a></> : 'Carregue um JSON com até 4 cartelas.'}</span></div><button type="button" onClick={() => fileRef.current?.click()}>Carregar JSON</button><input ref={fileRef} type="file" accept="application/json,.json" onChange={loadJson} hidden /></div>
+          <div className="recent-section"><div className="recent-heading"><h3>{t.marked}</h3><button type="button" onClick={() => setShowHistory((value) => !value)} disabled={!sortedCalledNumbers.length}>{showHistory ? t.collapse : t.showAll}</button></div>{sortedCalledNumbers.length ? <div className={`number-history${showHistory ? ' expanded' : ''}`}>{sortedCalledNumbers.map((number, index) => <span className={index === 0 ? 'latest' : ''} key={number}>{number}</span>)}</div> : <p className="empty-history">{t.noMarkedNumbers}</p>}</div>
+          <div className="panel-actions"><button type="button" onClick={undoLast} disabled={!calledNumbers.size}>{t.undoLast}</button><button type="button" onClick={clearMarks} disabled={!calledNumbers.size}>{t.clearMarks}</button></div>
+          <div className="json-loader"><div><strong>{canMark ? t.otherCards : t.letsStart}</strong><span>{canMark ? <>{t.savedForOneDay} <a href="./cartelas.json" download>{t.downloadDefault}</a></> : t.uploadCardsHint}</span></div><button type="button" onClick={() => fileRef.current?.click()}>{t.loadJson}</button><input ref={fileRef} type="file" accept="application/json,.json" onChange={loadJson} hidden /></div>
         </aside>
       </div>
     </main>
