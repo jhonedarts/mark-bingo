@@ -2,6 +2,8 @@
 
 Aplicativo estático para acompanhar de uma a quatro cartelas de bingo. Está preparado para publicar no GitHub Pages.
 
+Acesse a versão publicada: [Marca Bingo no GitHub Pages](https://jhonedarts.github.io/mark-bingo/).
+
 ## Desenvolvimento local
 
 Requer Node.js 22.13 ou superior e npm.
