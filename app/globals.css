@@ -179,7 +179,7 @@ button { cursor: pointer; }
   animation: ribbon-flash 0.72s steps(1, end) infinite;
 }
 
-.bingo-table { overflow: hidden; border: 1px solid #cec8e4; border-radius: 11px; }
+.bingo-table { overflow-x: auto; overflow-y: hidden; border: 1px solid #cec8e4; border-radius: 11px; }
 .bingo-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .bingo-row > div {
   aspect-ratio: 1.38 / 1;
@@ -788,7 +788,7 @@ button { cursor: pointer; }
 }
 .modal-json-editor textarea {
   width: 100%;
-  min-height: 300px;
+  min-height: 190px;
   display: block;
   resize: vertical;
   padding: 14px;
@@ -805,6 +805,29 @@ button { cursor: pointer; }
 .modal-json-editor textarea:focus {
   border-color: #9552e4;
   box-shadow: 0 0 0 4px rgba(149, 82, 228, 0.12);
+}
+.json-example-block {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #d9d2e9;
+  border-radius: 11px;
+  background: #eeebf5;
+}
+.json-example-block > strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #554b6e;
+  font-size: 0.68rem;
+}
+.json-example-block pre {
+  max-height: 230px;
+  overflow: auto;
+  margin: 0;
+  color: #392d56;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.66rem;
+  line-height: 1.45;
+  white-space: pre;
 }
 .modal-json-actions {
   display: flex;

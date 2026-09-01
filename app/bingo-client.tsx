@@ -1,6 +1,7 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
+import JSON5 from 'json5';
 
 type CellValue = number | null;
 type BingoCard = { title: string; numbers: CellValue[][] };
@@ -75,6 +76,7 @@ type Translation = {
   chooseImageHint: string;
   pasteJsonLabel: string;
   pasteJsonHint: string;
+  jsonExampleLabel: string;
   loadTextJson: string;
   back: string;
   close: string;
@@ -84,7 +86,13 @@ type Translation = {
   imageError: string;
 };
 
-const columns = ['B', 'I', 'N', 'G', 'O'];
+const bingoColumns = ['B', 'I', 'N', 'G', 'O'];
+function getColumnLabels(count: number) {
+  return count === bingoColumns.length
+    ? bingoColumns
+    : Array.from({ length: count }, (_, index) => String(index + 1));
+}
+
 const storageKey = 'marca-bingo:game:v1';
 const localeStorageKey = 'marca-bingo:locale:v1';
 const storageDuration = 24 * 60 * 60 * 1000;
@@ -110,16 +118,6 @@ const cardsJsonExample = `{
         [11, 20, null, 60, 75],
         [4, 21, 36, 49, 65],
         [7, 26, 44, 53, 63],
-      ],
-    },
-    {
-      title: '056',
-      numbers: [
-        [14, 26, 39, 58, 64],
-        [15, 20, 44, 55, 69],
-        [9, 30, null, 47, 68],
-        [10, 16, 42, 59, 73],
-        [1, 24, 33, 51, 72],
       ],
     },
   ],
@@ -166,11 +164,11 @@ const translations: Record<Locale, Translation> = {
     savedForOneDay: 'Dados salvos por 24 horas.',
     storageError: 'Não foi possível salvar os dados neste navegador.',
     loadBeforeMarking: 'Carregue as cartelas antes de marcar números.',
-    invalidNumber: 'Digite um número inteiro de 1 a 75.',
+    invalidNumber: 'Digite um número inteiro positivo.',
     absentNumber: (number) => 'O número ' + number + ' não está nestas cartelas.',
     markRemoved: (number) => 'Número sorteado ' + number + ' removido.',
     importSuccess: (count) => count + (count === 1 ? ' cartela carregada' : ' cartelas carregadas') + ' e salvas neste navegador por 24 horas.',
-    invalidJson: 'JSON inválido. Use de 1 a 4 cartelas no formato 5 × 5 esperado.',
+    invalidJson: 'Estrutura inválida. Use de 1 a 4 cartelas e mantenha a mesma quantidade de colunas em todas as linhas de cada cartela.',
     emptyTextJson: 'Cole ou digite um JSON antes de carregar.',
     loaderTitle: 'Carregar cartelas',
     loaderDescription: 'Escolha uma origem e revise os dados antes de começar.',
@@ -182,7 +180,8 @@ const translations: Record<Locale, Translation> = {
     chooseImage: 'Selecionar imagem da cartela',
     chooseImageHint: 'Use uma foto reta e nítida. O sistema detectará as linhas e colunas.',
     pasteJsonLabel: 'Cole ou digite as cartelas em JSON',
-    pasteJsonHint: 'O exemplo completo aparece no campo enquanto ele estiver vazio.',
+    pasteJsonHint: 'Aceita JSON e JSON5: aspas simples, chaves sem aspas e vírgulas finais.',
+    jsonExampleLabel: 'Exemplo de estrutura',
     loadTextJson: 'Carregar JSON digitado',
     back: 'Voltar para as cartelas',
     close: 'Fechar',
@@ -231,11 +230,11 @@ const translations: Record<Locale, Translation> = {
     savedForOneDay: 'Datos guardados durante 24 horas.',
     storageError: 'No fue posible guardar los datos en este navegador.',
     loadBeforeMarking: 'Carga los cartones antes de marcar números.',
-    invalidNumber: 'Escribe un número entero del 1 al 75.',
+    invalidNumber: 'Escribe un número entero positivo.',
     absentNumber: (number) => 'El número ' + number + ' no está en estos cartones.',
     markRemoved: (number) => 'Número sorteado ' + number + ' eliminado.',
     importSuccess: (count) => count + (count === 1 ? ' cartón cargado' : ' cartones cargados') + ' y guardados durante 24 horas.',
-    invalidJson: 'JSON no válido. Usa de 1 a 4 cartones con el formato 5 × 5 esperado.',
+    invalidJson: 'Estructura no válida. Usa de 1 a 4 cartones y mantén la misma cantidad de columnas en todas las filas de cada cartón.',
     emptyTextJson: 'Pega o escribe un JSON antes de cargarlo.',
     loaderTitle: 'Cargar cartones',
     loaderDescription: 'Elige un origen y revisa los datos antes de empezar.',
@@ -247,7 +246,8 @@ const translations: Record<Locale, Translation> = {
     chooseImage: 'Seleccionar imagen del cartón',
     chooseImageHint: 'Usa una foto recta y nítida. El sistema detectará filas y columnas.',
     pasteJsonLabel: 'Pega o escribe los cartones en JSON',
-    pasteJsonHint: 'El ejemplo completo aparece en el campo mientras esté vacío.',
+    pasteJsonHint: 'Acepta JSON y JSON5: comillas simples, claves sin comillas y comas finales.',
+    jsonExampleLabel: 'Ejemplo de estructura',
     loadTextJson: 'Cargar JSON escrito',
     back: 'Volver a los cartones',
     close: 'Cerrar',
@@ -296,11 +296,11 @@ const translations: Record<Locale, Translation> = {
     savedForOneDay: 'Data saved for 24 hours.',
     storageError: 'Unable to save data in this browser.',
     loadBeforeMarking: 'Load cards before marking numbers.',
-    invalidNumber: 'Enter a whole number from 1 to 75.',
+    invalidNumber: 'Enter a positive whole number.',
     absentNumber: (number) => 'Number ' + number + ' is not on these cards.',
     markRemoved: (number) => 'Called number ' + number + ' removed.',
     importSuccess: (count) => count + (count === 1 ? ' card loaded' : ' cards loaded') + ' and saved for 24 hours.',
-    invalidJson: 'Invalid JSON. Use 1 to 4 cards in the expected 5 × 5 format.',
+    invalidJson: 'Invalid structure. Use 1 to 4 cards and keep the same number of columns in every row of each card.',
     emptyTextJson: 'Paste or type JSON before loading.',
     loaderTitle: 'Load cards',
     loaderDescription: 'Choose a source and review the data before starting.',
@@ -312,7 +312,8 @@ const translations: Record<Locale, Translation> = {
     chooseImage: 'Select card image',
     chooseImageHint: 'Use a straight, clear photo. The app will detect rows and columns.',
     pasteJsonLabel: 'Paste or type cards as JSON',
-    pasteJsonHint: 'The full example appears in the field while it is empty.',
+    pasteJsonHint: 'Accepts JSON and JSON5: single quotes, unquoted keys, and trailing commas.',
+    jsonExampleLabel: 'Structure example',
     loadTextJson: 'Load typed JSON',
     back: 'Back to cards',
     close: 'Close',
@@ -326,26 +327,31 @@ const translations: Record<Locale, Translation> = {
 function isValidCard(value: unknown): value is BingoCard {
   if (!value || typeof value !== 'object') return false;
   const card = value as Partial<BingoCard>;
+  const columnCount =
+    Array.isArray(card.numbers) && Array.isArray(card.numbers[0])
+      ? card.numbers[0].length
+      : 0;
   return (
     typeof card.title === 'string' &&
     card.title.trim().length > 0 &&
     Array.isArray(card.numbers) &&
-    card.numbers.length === 5 &&
+    card.numbers.length > 0 &&
+    columnCount > 0 &&
     card.numbers.every(
       (row) =>
         Array.isArray(row) &&
-        row.length === 5 &&
+        row.length === columnCount &&
         row.every(
           (cell) =>
             cell === null ||
-            (typeof cell === 'number' && Number.isInteger(cell) && cell >= 1 && cell <= 75),
+            (typeof cell === 'number' && Number.isInteger(cell) && cell >= 1 && cell <= 9999),
         ),
     )
   );
 }
 
 function isValidMarkedNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 75;
+  return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 9999;
 }
 
 function getCards(value: unknown): BingoCard[] | null {
@@ -608,7 +614,7 @@ export default function Home() {
       return;
     }
     const parsed = Number(numberInput);
-    if (!numberInput.trim() || !Number.isInteger(parsed) || parsed < 1 || parsed > 75) {
+    if (!numberInput.trim() || !Number.isInteger(parsed) || parsed < 1 || parsed > 9999) {
       setNotice({ type: 'error', text: t.invalidNumber });
       inputRef.current?.focus();
       return;
@@ -652,7 +658,7 @@ export default function Home() {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      importCards(JSON.parse(await file.text()) as unknown);
+      importCards(JSON5.parse(await file.text()) as unknown);
     } catch {
       setNotice({ type: 'error', text: t.invalidJson });
     } finally {
@@ -667,7 +673,7 @@ export default function Home() {
       return;
     }
     try {
-      importCards(JSON.parse(cardsJsonInput) as unknown);
+      importCards(JSON5.parse(cardsJsonInput) as unknown);
       setCardsJsonInput('');
       setImageDetection(null);
     } catch {
@@ -812,9 +818,14 @@ export default function Home() {
               {activeCards.map((card, cardIndex) => {
                 const winner = hasBingo(card, calledNumbers);
                 const progress = getCardProgress(card, calledNumbers);
+                const columnCount = card.numbers[0].length;
+                const columnLabels = getColumnLabels(columnCount);
+                const gridStyle = {
+                  gridTemplateColumns: 'repeat(' + columnCount + ', minmax(0, 1fr))',
+                };
                 return (
                   <article
-                    className={'bingo-card' + (winner ? ' is-winner' : '')}
+                    className={'bingo-card' + (winner ? ' is-winner' : '') + (columnCount > 6 ? ' dense-card' : '')}
                     key={card.title + '-' + cardIndex}
                   >
                     <div className="card-topline">
@@ -834,13 +845,13 @@ export default function Home() {
                     </div>
                     {winner && <div className="winner-ribbon">BINGO!</div>}
                     <div className="bingo-table" role="table" aria-label={t.card + ' ' + card.title}>
-                      <div className="bingo-row bingo-header" role="row">
-                        {columns.map((column) => (
+                      <div className="bingo-row bingo-header" role="row" style={gridStyle}>
+                        {columnLabels.map((column) => (
                           <div role="columnheader" key={column}>{column}</div>
                         ))}
                       </div>
                       {card.numbers.map((row, rowIndex) => (
-                        <div className="bingo-row" role="row" key={rowIndex}>
+                        <div className="bingo-row" role="row" key={rowIndex} style={gridStyle}>
                           {row.map((number, columnIndex) => {
                             const marked = number === null || calledNumbers.has(number);
                             return (
@@ -882,7 +893,7 @@ export default function Home() {
                 type="number"
                 inputMode="numeric"
                 min="1"
-                max="75"
+                max="9999"
                 autoComplete="off"
                 placeholder="00"
                 value={numberInput}
@@ -1092,10 +1103,14 @@ export default function Home() {
                     id="cards-json-text"
                     value={cardsJsonInput}
                     onChange={(event) => setCardsJsonInput(event.target.value)}
-                    placeholder={cardsJsonExample}
+                    placeholder={t.pasteJsonLabel}
                     aria-describedby="cards-json-hint"
                     spellCheck="false"
                   />
+                  <section className="json-example-block" aria-label={t.jsonExampleLabel}>
+                    <strong>{t.jsonExampleLabel}</strong>
+                    <pre>{cardsJsonExample}</pre>
+                  </section>
                   <div className="modal-json-actions">
                     <span id="cards-json-hint">{t.pasteJsonHint}</span>
                     <button type="button" onClick={loadJsonText}>
