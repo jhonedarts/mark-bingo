@@ -100,7 +100,7 @@ const localeShortNames: Record<Locale, string> = {
   en: 'EN',
 };
 
-const exampleCards = {
+const cardsJsonExample = "{
   cards: [
     {
       title: '037',
@@ -123,8 +123,7 @@ const exampleCards = {
       ],
     },
   ],
-};
-const cardsJsonExample = JSON.stringify(exampleCards, null, 2);
+}";
 
 const translations: Record<Locale, Translation> = {
   'pt-BR': {
