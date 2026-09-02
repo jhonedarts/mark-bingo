@@ -1,0 +1,25 @@
+import type { BingoCard, Translation } from '../types';
+
+type BingoAlertProps = {
+  winners: BingoCard[];
+  translation: Translation;
+};
+
+export function BingoAlert({ winners, translation: t }: BingoAlertProps) {
+  if (!winners.length) return null;
+
+  return (
+    <section className="bingo-alert" role="alert" aria-live="assertive">
+      <span aria-hidden="true">★</span>
+      <div>
+        <strong>BINGO!</strong>
+        <small>
+          {winners.length === 1
+            ? t.cardComplete(winners[0].title)
+            : t.cardsComplete(winners.length)}
+        </small>
+      </div>
+      <span aria-hidden="true">★</span>
+    </section>
+  );
+}
