@@ -7,6 +7,7 @@ import {
   localeShortNames,
   type Translation,
 } from '../i18n';
+import { faviconUrl } from '../public-assets';
 import type { Locale } from '../types';
 
 type TopBarProps = {
@@ -89,7 +90,7 @@ export function TopBar({
       <div className="brand" aria-label={t.BRAND_LABEL}>
         <Image
           className="brand-mark"
-          src="/favicon.svg?v=2"
+          src={faviconUrl}
           alt=""
           width={25}
           height={25}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { faviconUrl } from './src/public-assets';
 import './globals.css';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Marca Bingo',
   description: 'Marcador local para acompanhar até quatro cartelas de bingo.',
   icons: {
-    icon: [{ url: '/favicon.svg?v=2', type: 'image/svg+xml' }],
+    icon: [{ url: faviconUrl, type: 'image/svg+xml' }],
   },
 };
 
