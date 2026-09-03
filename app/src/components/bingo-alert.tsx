@@ -1,3 +1,4 @@
+import './bingo-alert.css';
 import type { BingoCard, Translation } from '../types';
 
 type BingoAlertProps = {

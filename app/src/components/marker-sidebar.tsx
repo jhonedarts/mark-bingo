@@ -1,3 +1,4 @@
+import './marker-sidebar.css';
 import type { FormEventHandler, RefObject } from 'react';
 import type { Notice, Translation } from '../types';
 

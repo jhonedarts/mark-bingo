@@ -9,7 +9,9 @@ export type Notice = { type: 'error' | 'info'; text: string } | null;
 
 export type Locale = 'pt-BR' | 'es' | 'en';
 
-export type LoadMode = 'file' | 'image' | 'json';
+export type LoadMode = 'image' | 'json';
+
+export type JsonLoadMode = 'file' | 'text';
 
 export type ImageDetection = {
   title: string;
@@ -65,9 +67,10 @@ export type Translation = {
   emptyTextJson: string;
   loaderTitle: string;
   loaderDescription: string;
-  loadFromFile: string;
   loadFromImage: string;
   loadFromJson: string;
+  importJson: string;
+  typeJson: string;
   chooseJsonFile: string;
   chooseJsonFileHint: string;
   chooseImage: string;

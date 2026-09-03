@@ -1,29 +1,40 @@
 'use client';
 
+import './bingo-client.css';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import JSON5 from 'json5';
-import { BingoAlert } from './bingo/components/bingo-alert';
-import { CardLoaderModal } from './bingo/components/card-loader-modal';
-import { CardsPanel } from './bingo/components/cards-panel';
-import { MarkerSidebar } from './bingo/components/marker-sidebar';
-import { TopBar } from './bingo/components/top-bar';
-import { getCards, hasBingo, isNumberOnCards } from './bingo/domain';
-import { recognizeCardImage } from './bingo/ocr';
-import { readSavedGame, readSavedLocale, saveGame, saveLocale } from './bingo/storage';
-import { localeOrder, translations } from './bingo/translations';
-import type { BingoCard, ImageDetection, LoadMode, Locale, Notice } from './bingo/types';
+import { BingoAlert } from './src/components/bingo-alert';
+import { CardLoaderModal } from './src/components/card-loader-modal';
+import { CardsPanel } from './src/components/cards-panel';
+import { MarkerSidebar } from './src/components/marker-sidebar';
+import { TopBar } from './src/components/top-bar';
+import { formatCardsJson } from './src/card-json';
+import { getCards, hasBingo, isNumberOnCards } from './src/domain';
+import { recognizeCardImage } from './src/ocr';
+import { readSavedGame, readSavedLocale, saveGame, saveLocale } from './src/storage';
+import { localeOrder, translations } from './src/translations';
+import type {
+  BingoCard,
+  ImageDetection,
+  JsonLoadMode,
+  LoadMode,
+  Locale,
+  Notice,
+} from './src/types';
 
 export default function BingoClient() {
   const [cards, setCards] = useState<BingoCard[] | null>(null);
   const [calledNumbers, setCalledNumbers] = useState<Set<number>>(new Set());
   const [numberInput, setNumberInput] = useState('');
   const [cardsJsonInput, setCardsJsonInput] = useState('');
-  const [notice, setNotice] = useState<Notice>(null);
+  const [markerNotice, setMarkerNotice] = useState<Notice>(null);
+  const [loaderNotice, setLoaderNotice] = useState<Notice>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [editingHistory, setEditingHistory] = useState(false);
   const [locale, setLocale] = useState<Locale>('pt-BR');
   const [showLoader, setShowLoader] = useState(false);
-  const [loadMode, setLoadMode] = useState<LoadMode>('file');
+  const [loadMode, setLoadMode] = useState<LoadMode>('image');
+  const [jsonLoadMode, setJsonLoadMode] = useState<JsonLoadMode>('text');
   const [imageProgress, setImageProgress] = useState<number | null>(null);
   const [imageDetection, setImageDetection] = useState<ImageDetection | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -86,7 +97,7 @@ export default function BingoClient() {
     try {
       saveGame(cardsToSave, numbersToSave);
     } catch {
-      setNotice({ type: 'error', text: t.storageError });
+      setMarkerNotice({ type: 'error', text: t.storageError });
     }
   }
 
@@ -99,9 +110,11 @@ export default function BingoClient() {
     }
   }
 
-  function openLoader(mode: LoadMode = 'file') {
+  function openLoader(mode: LoadMode = 'image') {
     setLoadMode(mode);
+    setJsonLoadMode('text');
     setImageDetection(null);
+    setLoaderNotice(null);
     setShowLoader(true);
   }
 
@@ -113,7 +126,8 @@ export default function BingoClient() {
     setCards(importedCards);
     setCalledNumbers(emptyCalledNumbers);
     persistGame(importedCards, emptyCalledNumbers);
-    setNotice({ type: 'info', text: t.importSuccess(importedCards.length) });
+    setMarkerNotice({ type: 'info', text: t.importSuccess(importedCards.length) });
+    setLoaderNotice(null);
     setEditingHistory(false);
     setShowLoader(false);
   }
@@ -121,13 +135,13 @@ export default function BingoClient() {
   function markNumber(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canMark) {
-      setNotice({ type: 'error', text: t.loadBeforeMarking });
+      setMarkerNotice({ type: 'error', text: t.loadBeforeMarking });
       return;
     }
 
     const parsed = Number(numberInput);
     if (!numberInput.trim() || !Number.isInteger(parsed) || parsed < 1 || parsed > 9999) {
-      setNotice({ type: 'error', text: t.invalidNumber });
+      setMarkerNotice({ type: 'error', text: t.invalidNumber });
       inputRef.current?.focus();
       return;
     }
@@ -136,7 +150,7 @@ export default function BingoClient() {
     next.add(parsed);
     setCalledNumbers(next);
     setNumberInput('');
-    setNotice(
+    setMarkerNotice(
       isNumberOnCards(activeCards, parsed) ? null : { type: 'info', text: t.absentNumber(parsed) },
     );
     persistGame(activeCards, next);
@@ -147,7 +161,7 @@ export default function BingoClient() {
     const next = new Set(calledNumbers);
     next.delete(number);
     setCalledNumbers(next);
-    setNotice({ type: 'info', text: t.markRemoved(number) });
+    setMarkerNotice({ type: 'info', text: t.markRemoved(number) });
     persistGame(activeCards, next);
   }
 
@@ -160,7 +174,7 @@ export default function BingoClient() {
   function clearMarks() {
     const next = new Set<number>();
     setCalledNumbers(next);
-    setNotice(null);
+    setMarkerNotice(null);
     setEditingHistory(false);
     persistGame(activeCards, next);
     inputRef.current?.focus();
@@ -173,7 +187,7 @@ export default function BingoClient() {
     try {
       importCards(JSON5.parse(await file.text()) as unknown);
     } catch {
-      setNotice({ type: 'error', text: t.invalidJson });
+      setLoaderNotice({ type: 'error', text: t.invalidJson });
     } finally {
       event.target.value = '';
       inputRef.current?.focus();
@@ -182,7 +196,7 @@ export default function BingoClient() {
 
   function loadJsonText() {
     if (!cardsJsonInput.trim()) {
-      setNotice({ type: 'error', text: t.emptyTextJson });
+      setLoaderNotice({ type: 'error', text: t.emptyTextJson });
       return;
     }
 
@@ -191,33 +205,30 @@ export default function BingoClient() {
       setCardsJsonInput('');
       setImageDetection(null);
     } catch {
-      setNotice({ type: 'error', text: t.invalidJson });
+      setLoaderNotice({ type: 'error', text: t.invalidJson });
     }
     inputRef.current?.focus();
   }
 
-  async function loadImage(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  async function loadImage(file: File) {
     setImageProgress(0);
     setImageDetection(null);
-    setNotice(null);
+    setLoaderNotice(null);
 
     try {
       const detected = await recognizeCardImage(file, setImageProgress);
-      setCardsJsonInput(JSON.stringify({ cards: [detected.card] }, null, 2));
+      setCardsJsonInput(formatCardsJson([detected.card]));
       setImageDetection({
         title: detected.card.title,
         rows: detected.rows,
         columns: detected.columns,
       });
       setLoadMode('json');
+      setJsonLoadMode('text');
     } catch {
-      setNotice({ type: 'error', text: t.imageError });
+      setLoaderNotice({ type: 'error', text: t.imageError });
     } finally {
       setImageProgress(null);
-      event.target.value = '';
     }
   }
 
@@ -237,7 +248,7 @@ export default function BingoClient() {
         <CardsPanel
           cards={cards}
           calledNumbers={calledNumbers}
-          onOpenLoader={() => openLoader('file')}
+          onOpenLoader={() => openLoader('image')}
           translation={t}
         />
         <MarkerSidebar
@@ -246,15 +257,15 @@ export default function BingoClient() {
           editingHistory={editingHistory}
           inputRef={inputRef}
           isNumberOnAnyCard={(number) => isNumberOnCards(activeCards, number)}
-          notice={notice}
+          notice={markerNotice}
           numberInput={numberInput}
           onClearMarks={clearMarks}
           onInputChange={(value) => {
             setNumberInput(value);
-            setNotice(null);
+            setMarkerNotice(null);
           }}
           onMarkNumber={markNumber}
-          onOpenLoader={() => openLoader('file')}
+          onOpenLoader={() => openLoader('image')}
           onRemoveCalledNumber={removeCalledNumber}
           onToggleEditing={() => {
             setEditingHistory((value) => !value);
@@ -276,13 +287,18 @@ export default function BingoClient() {
           imageDetection={imageDetection}
           imageProgress={imageProgress}
           imageRef={imageRef}
+          jsonLoadMode={jsonLoadMode}
           loadMode={loadMode}
-          notice={notice}
-          onCardsJsonChange={setCardsJsonInput}
+          notice={loaderNotice}
+          onCardsJsonChange={(value) => {
+            setCardsJsonInput(value);
+            setLoaderNotice(null);
+          }}
           onClose={() => setShowLoader(false)}
-          onLoadImage={loadImage}
+          onLoadImageFile={loadImage}
           onLoadJsonFile={loadJsonFile}
           onLoadJsonText={loadJsonText}
+          onJsonModeChange={setJsonLoadMode}
           onModeChange={setLoadMode}
           translation={t}
         />

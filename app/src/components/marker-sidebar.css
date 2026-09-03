@@ -1,0 +1,362 @@
+.control-panel {
+  position: sticky;
+  top: 22px;
+  margin-top: 90px;
+  padding: 24px;
+  border-radius: 22px;
+  color: white;
+  background: #201d35;
+  box-shadow: 0 20px 54px rgba(25, 21, 47, 0.22);
+}
+
+.control-title > span {
+  margin: 0 0 6px;
+  color: var(--purple);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.control-title h2 {
+  margin: 0;
+  color: white;
+  font-size: 1.65rem;
+  letter-spacing: -0.04em;
+}
+
+.control-title p {
+  margin: 8px 0 0;
+  color: #a9a5ba;
+  font-size: 0.84rem;
+}
+
+.number-form {
+  margin-top: 22px;
+}
+
+.number-form label {
+  display: block;
+  margin-bottom: 8px;
+  color: #c8c4d6;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.input-row input {
+  width: 100%;
+  min-width: 0;
+  height: 56px;
+  padding: 0 15px;
+  border: 1px solid #4b4663;
+  border-radius: 12px;
+  outline: none;
+  color: white;
+  background: #2a2642;
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.input-row input::placeholder {
+  color: #645e7c;
+}
+
+.input-row input:focus {
+  border-color: #b759f1;
+  box-shadow: 0 0 0 4px rgba(183, 89, 241, 0.14);
+}
+
+.input-row input::-webkit-outer-spin-button,
+.input-row input::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.confirm-button {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(135deg, var(--pink), #8241ed);
+  font-size: 0.78rem;
+  font-weight: 800;
+  box-shadow: 0 9px 22px rgba(199, 43, 158, 0.27);
+}
+
+.confirm-button:hover {
+  filter: brightness(1.08);
+}
+
+.confirm-button b {
+  font-size: 1.25rem;
+}
+
+.notice {
+  margin: 11px 0 -5px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.notice.error {
+  color: #ffd7df;
+  background: rgba(239, 49, 85, 0.15);
+}
+
+.notice.info {
+  color: #dcd1ff;
+  background: rgba(132, 74, 238, 0.18);
+}
+
+.recent-section {
+  margin-top: 23px;
+  padding-top: 20px;
+  border-top: 1px solid #39344f;
+}
+
+.recent-heading,
+.recent-controls {
+  display: flex;
+  align-items: center;
+}
+
+.recent-heading {
+  justify-content: space-between;
+}
+
+.recent-heading h3 {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.recent-heading button {
+  border: 0;
+  color: #a990ff;
+  background: transparent;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.recent-controls {
+  gap: 7px;
+}
+
+.recent-controls button:last-child {
+  padding: 4px 7px;
+  border: 1px solid #594b7d;
+  border-radius: 6px;
+}
+
+.number-history {
+  max-height: 77px;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+  padding: 6px 5px 0 0;
+}
+
+.number-history.expanded {
+  max-height: 153px;
+  overflow-y: auto;
+}
+
+.number-history button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  padding: 0;
+  border: 1px solid #47415f;
+  border-radius: 50%;
+  color: #d7d3e3;
+  background: #29253e;
+  font-size: 0.75rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.number-history button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.number-history button.latest {
+  border-color: #aa49ea;
+  color: white;
+  background: linear-gradient(135deg, var(--pink), #7646ed);
+}
+
+.number-history button.matched-card:not(.latest) {
+  border-color: #713b8f;
+  color: #f2eaff;
+  background: linear-gradient(135deg, #8d235d, #433074);
+}
+
+.number-history.editing button {
+  cursor: pointer;
+  box-shadow: 0 0 0 2px rgba(238, 88, 169, 0.12);
+}
+
+.number-history.editing button:hover {
+  border-color: #ff7abf;
+  transform: translateY(-1px);
+}
+
+.number-history button small {
+  width: 13px;
+  height: 13px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  border-radius: 50%;
+  color: white;
+  background: #ef3155;
+  font-size: 0.63rem;
+  line-height: 1;
+}
+
+.empty-history {
+  margin: 13px 0 0;
+  color: #77728b;
+  font-size: 0.73rem;
+}
+
+.panel-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.panel-actions button,
+.json-loader button {
+  min-height: 35px;
+  border: 1px solid #49435f;
+  border-radius: 8px;
+  color: #c9c5d7;
+  background: transparent;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.panel-actions button:hover:not(:disabled),
+.json-loader button:hover {
+  border-color: #7c709f;
+  color: white;
+}
+
+.panel-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.json-loader {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #39344f;
+}
+
+.json-loader div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.json-loader strong {
+  font-size: 0.75rem;
+}
+
+.json-loader span {
+  color: #827d95;
+  font-size: 0.62rem;
+}
+
+.json-loader button {
+  padding: 0 11px;
+  border-color: #604d8a;
+  color: #bc9dff;
+}
+
+.input-row input:disabled,
+.confirm-button:disabled,
+.recent-heading button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 1120px) {
+  .control-panel {
+    position: static;
+    margin-top: 0;
+    display: grid;
+    grid-template-columns: minmax(220px, 0.8fr) minmax(330px, 1.2fr);
+    gap: 20px 28px;
+  }
+
+  .number-form,
+  .recent-section,
+  .json-loader,
+  .panel-actions {
+    margin-top: 0;
+  }
+
+  .panel-actions {
+    align-self: start;
+  }
+}
+
+@media (max-width: 730px) {
+  .control-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .recent-heading {
+    align-items: flex-start;
+  }
+
+  .recent-controls {
+    gap: 3px;
+  }
+}
+
+@media (max-width: 430px) {
+  .control-panel {
+    padding: 17px;
+    border-radius: 16px;
+  }
+
+  .input-row {
+    grid-template-columns: 1fr 85px;
+  }
+
+  .confirm-button {
+    justify-content: center;
+  }
+
+  .confirm-button b {
+    display: none;
+  }
+}

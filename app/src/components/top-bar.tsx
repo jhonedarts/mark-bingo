@@ -1,3 +1,4 @@
+import './top-bar.css';
 import { localeNames, localeShortNames } from '../translations';
 import type { Locale, Translation } from '../types';
 

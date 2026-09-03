@@ -1,3 +1,4 @@
+import './cards-panel.css';
 import { getCardProgress, getColumnLabels, hasBingo } from '../domain';
 import type { BingoCard, Translation } from '../types';
 

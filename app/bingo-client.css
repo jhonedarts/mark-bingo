@@ -1,0 +1,26 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.workspace {
+  width: min(1332px, calc(100% - clamp(29px, 5.4vw, 86px)));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(270px, 324px);
+  gap: clamp(22px, 2.7vw, 43px);
+  align-items: start;
+  padding: 41px 0 58px;
+}
+
+@media (max-width: 1120px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 730px) {
+  .workspace {
+    width: min(100% - 26px, 612px);
+    padding-top: 25px;
+  }
+}

@@ -5,6 +5,7 @@ type OcrWord = {
   value: number;
   x: number;
   y: number;
+  width: number;
   height: number;
 };
 
@@ -82,10 +83,11 @@ export async function recognizeCardImage(
   onProgress: (progress: number) => void,
 ): Promise<DetectedCard> {
   const { createWorker, PSM } = await import('tesseract.js');
+  let isReadingFullImage = true;
   const worker = await createWorker('eng', undefined, {
     logger: (message) => {
-      if (message.status.includes('recognizing text')) {
-        onProgress(Math.round(message.progress * 100));
+      if (isReadingFullImage && message.status.includes('recognizing text')) {
+        onProgress(Math.round(message.progress * 80));
       }
     },
   });
@@ -93,7 +95,8 @@ export async function recognizeCardImage(
   try {
     await worker.setParameters({
       tessedit_char_whitelist: '0123456789',
-      tessedit_pageseg_mode: PSM.SPARSE_TEXT,
+      tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
+      preserve_interword_spaces: '1',
     });
     const result = await worker.recognize(file, {}, { blocks: true, text: true });
     const words: OcrWord[] = (result.data.blocks ?? [])
@@ -107,6 +110,7 @@ export async function recognizeCardImage(
           value: Number(text),
           x: (word.bbox.x0 + word.bbox.x1) / 2,
           y: (word.bbox.y0 + word.bbox.y1) / 2,
+          width: word.bbox.x1 - word.bbox.x0,
           height: word.bbox.y1 - word.bbox.y0,
         };
       })
@@ -118,6 +122,46 @@ export async function recognizeCardImage(
           word.value <= 75,
       );
 
+    const possiblyTruncatedWords = words.filter((word) => word.text.length === 1);
+    if (possiblyTruncatedWords.length) {
+      isReadingFullImage = false;
+      await worker.setParameters({
+        tessedit_pageseg_mode: PSM.SINGLE_WORD,
+      });
+
+      for (const [index, word] of possiblyTruncatedWords.entries()) {
+        const horizontalPadding = Math.max(20, word.height * 1.2);
+        const verticalPadding = Math.max(8, word.height * 0.5);
+        const refined = await worker.recognize(
+          file,
+          {
+            rectangle: {
+              left: Math.max(0, Math.round(word.x - word.width / 2 - horizontalPadding)),
+              top: Math.max(0, Math.round(word.y - word.height / 2 - verticalPadding)),
+              width: Math.round(word.width + horizontalPadding * 2),
+              height: Math.round(word.height + verticalPadding * 2),
+            },
+          },
+          { text: true },
+        );
+        const refinedText = refined.data.text.replace(/\D/g, '');
+        const refinedValue = Number(refinedText);
+
+        if (
+          refinedText.length > word.text.length &&
+          Number.isInteger(refinedValue) &&
+          refinedValue >= 1 &&
+          refinedValue <= 75
+        ) {
+          word.text = refinedText;
+          word.value = refinedValue;
+        }
+
+        onProgress(80 + Math.round(((index + 1) / possiblyTruncatedWords.length) * 20));
+      }
+    }
+
+    onProgress(100);
     return detectCardFromWords(words, file.name);
   } finally {
     await worker.terminate();

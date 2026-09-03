@@ -1,0 +1,123 @@
+.topbar {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 3.6vw, 61px);
+  color: white;
+  background: #18172b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.brand,
+.topbar-meta {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 12px;
+}
+
+.brand-name {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.brand-mark {
+  width: 38px;
+  height: 25px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-content: center;
+  gap: 4px;
+}
+
+.brand-mark i {
+  height: 4px;
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink), #a93fd7);
+}
+
+.brand-mark i:nth-child(2),
+.brand-mark i:nth-child(4) {
+  transform: translateY(3px);
+}
+
+.brand-mark i:nth-child(5) {
+  transform: translateY(6px);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-meta {
+  gap: 9px;
+  color: #c8c4d6;
+  font-size: 0.77rem;
+  letter-spacing: 0.03em;
+}
+
+.topbar-meta strong {
+  margin-left: 4px;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.language-switch {
+  min-width: 46px;
+  height: 29px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.language-switch:hover,
+.language-switch:focus-visible {
+  border-color: #ffcf32;
+  background: rgba(255, 207, 50, 0.16);
+  outline: none;
+}
+
+.language-switch:active {
+  transform: scale(0.96);
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #54e4a3;
+  box-shadow: 0 0 0 5px rgba(84, 228, 163, 0.1);
+}
+
+@media (max-width: 730px) {
+  .topbar {
+    height: 59px;
+    padding: 0 16px;
+  }
+
+  .topbar-meta span:not(.live-dot) {
+    display: none;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-name {
+    font-size: 0.82rem;
+  }
+}
