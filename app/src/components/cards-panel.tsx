@@ -1,6 +1,7 @@
 import './cards-panel.css';
 import { getCardProgress, getColumnLabels, hasBingo } from '../domain';
-import type { BingoCard, Translation } from '../types';
+import { formatMessage, type Translation } from '../i18n';
+import type { BingoCard } from '../types';
 
 type CardsPanelProps = {
   cards: BingoCard[] | null;
@@ -18,25 +19,25 @@ export function CardsPanel({
   const activeCards = cards ?? [];
 
   return (
-    <section className="cards-panel" aria-label={t.cardsPanelLabel}>
+    <section className="cards-panel" aria-label={t.CARDS_PANEL_LABEL}>
       <div className="section-heading">
         <div>
-          <p>{t.liveTracking}</p>
-          <h1>{t.yourCards}</h1>
+          <p>{t.LIVE_TRACKING}</p>
+          <h1>{t.YOUR_CARDS}</h1>
         </div>
       </div>
 
       {cards === null ? (
         <section className="empty-cards" aria-live="polite">
-          <strong>{t.loadingCards}</strong>
+          <strong>{t.LOADING_CARDS}</strong>
         </section>
       ) : activeCards.length === 0 ? (
         <section className="empty-cards" aria-live="polite">
           <span aria-hidden="true">↥</span>
-          <h2>{t.noCards}</h2>
-          <p>{t.noCardsHint}</p>
+          <h2>{t.NO_CARDS}</h2>
+          <p>{t.NO_CARDS_HINT}</p>
           <button type="button" onClick={onOpenLoader}>
-            {t.openLoader}
+            {t.OPEN_LOADER}
           </button>
         </section>
       ) : (
@@ -83,14 +84,19 @@ function BingoCardView({ card, calledNumbers, translation: t }: BingoCardViewPro
         </div>
         <div className="card-meta">
           <div className="card-title">
-            <small>{t.card}</small>
+            <small>{t.CARD}</small>
             <strong>{card.title}</strong>
           </div>
-          <span className="card-progress">{t.cardProgress(progress.marked, progress.total)}</span>
+          <span className="card-progress">
+            {formatMessage(t.CARD_PROGRESS, {
+              marked: progress.marked,
+              total: progress.total,
+            })}
+          </span>
         </div>
       </div>
       {winner && <div className="winner-ribbon">BINGO!</div>}
-      <div className="bingo-table" role="table" aria-label={t.card + ' ' + card.title}>
+      <div className="bingo-table" role="table" aria-label={t.CARD + ' ' + card.title}>
         <div className="bingo-row bingo-header" role="row" style={gridStyle}>
           {columnLabels.map((column) => (
             <div role="columnheader" key={column}>
@@ -107,7 +113,11 @@ function BingoCardView({ card, calledNumbers, translation: t }: BingoCardViewPro
                   role="cell"
                   className={(marked ? 'marked' : '') + (number === null ? ' free' : '')}
                   key={rowIndex + '-' + columnIndex}
-                  aria-label={number === null ? t.freeSpace : t.numberCell(number, marked)}
+                  aria-label={
+                    number === null
+                      ? t.FREE_SPACE
+                      : formatMessage(marked ? t.NUMBER_CELL_MARKED : t.NUMBER_CELL, { number })
+                  }
                 >
                   {number === null ? <span aria-hidden="true">★</span> : number}
                 </div>

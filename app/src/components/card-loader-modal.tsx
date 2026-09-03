@@ -1,13 +1,13 @@
 import './card-loader-modal.css';
 import { useRef, useState } from 'react';
 import type { ChangeEventHandler, DragEvent, RefObject } from 'react';
+import { formatMessage, type Translation } from '../i18n';
 import type {
   ImageDetection,
   ImageProgress,
   JsonLoadMode,
   LoadMode,
   Notice,
-  Translation,
 } from '../types';
 
 const cardsJsonExample = `{
@@ -71,9 +71,13 @@ export function CardLoaderModal({
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const imageDragDepth = useRef(0);
   const tabs: Array<[LoadMode, string]> = [
-    ['image', t.loadFromImage],
-    ['json', t.loadFromJson],
+    ['image', t.LOAD_FROM_IMAGE],
+    ['json', t.LOAD_FROM_JSON],
   ];
+  const imagesReadyLabel = formatMessage(
+    imageDetections.length === 1 ? t.IMAGES_READY_ONE : t.IMAGES_READY_OTHER,
+    { count: imageDetections.length },
+  );
 
   function handleImageDragEnter(event: DragEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -111,15 +115,15 @@ export function CardLoaderModal({
       >
         <header className="loader-header">
           <div>
-            <h2 id="loader-title">{t.loaderTitle}</h2>
-            <p>{t.loaderDescription}</p>
+            <h2 id="loader-title">{t.LOADER_TITLE}</h2>
+            <p>{t.LOADER_DESCRIPTION}</p>
           </div>
-          <button type="button" className="loader-close" onClick={onClose} aria-label={t.close}>
+          <button type="button" className="loader-close" onClick={onClose} aria-label={t.CLOSE}>
             ×
           </button>
         </header>
 
-        <nav className="loader-tabs" aria-label={t.loaderTitle}>
+        <nav className="loader-tabs" aria-label={t.LOADER_TITLE}>
           {tabs.map(([mode, label]) => (
             <button
               type="button"
@@ -154,17 +158,17 @@ export function CardLoaderModal({
                 <strong>
                   {imageProgress === null
                     ? imageDetections.length >= 4
-                      ? t.imageLimitHint
+                      ? t.IMAGE_LIMIT_HINT
                       : imageDetections.length
-                      ? t.addMoreImages
-                      : t.chooseImage
-                    : t.imageProcessing(
-                        imageProgress.current,
-                        imageProgress.total,
-                        imageProgress.percent,
-                      )}
+                      ? t.ADD_MORE_IMAGES
+                      : t.CHOOSE_IMAGE
+                    : formatMessage(t.IMAGE_PROCESSING, {
+                        current: imageProgress.current,
+                        total: imageProgress.total,
+                        progress: imageProgress.percent,
+                      })}
                 </strong>
-                <small>{imageProgress?.fileName ?? t.chooseImageHint}</small>
+                <small>{imageProgress?.fileName ?? t.CHOOSE_IMAGE_HINT}</small>
                 {imageProgress !== null && (
                   <i className="ocr-progress" aria-hidden="true">
                     <b style={{ width: imageProgress.percent + '%' }} />
@@ -185,10 +189,10 @@ export function CardLoaderModal({
               />
 
               {imageDetections.length > 0 && (
-                <section className="image-queue" aria-label={t.imagesReady(imageDetections.length)}>
+                <section className="image-queue" aria-label={imagesReadyLabel}>
                   <div className="image-queue-heading">
-                    <strong>{t.imagesReady(imageDetections.length)}</strong>
-                    <span>{t.imageLimitHint}</span>
+                    <strong>{imagesReadyLabel}</strong>
+                    <span>{t.IMAGE_LIMIT_HINT}</span>
                   </div>
                   <ul>
                     {imageDetections.map((detection, index) => (
@@ -199,16 +203,21 @@ export function CardLoaderModal({
                         <div>
                           <strong>{detection.fileName}</strong>
                           <span>
-                            {t.card} {detection.title} ·{' '}
-                            {t.imageDetected(detection.rows, detection.columns)}
+                            {t.CARD} {detection.title} ·{' '}
+                            {formatMessage(t.IMAGE_DETECTED, {
+                              rows: detection.rows,
+                              columns: detection.columns,
+                            })}
                           </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => onRemoveImage(index)}
                           disabled={imageProgress !== null}
-                          aria-label={t.removeImage(detection.fileName)}
-                          title={t.removeImage(detection.fileName)}
+                          aria-label={formatMessage(t.REMOVE_IMAGE, {
+                            fileName: detection.fileName,
+                          })}
+                          title={formatMessage(t.REMOVE_IMAGE, { fileName: detection.fileName })}
                         >
                           ×
                         </button>
@@ -221,7 +230,7 @@ export function CardLoaderModal({
                     onClick={onReviewImages}
                     disabled={imageProgress !== null}
                   >
-                    {t.reviewImages}
+                    {t.REVIEW_IMAGES}
                     <span aria-hidden="true">→</span>
                   </button>
                 </section>
@@ -231,14 +240,14 @@ export function CardLoaderModal({
 
           {loadMode === 'json' && (
             <div className="json-loader-pane">
-              <div className="json-mode-toggle" role="group" aria-label={t.loadFromJson}>
+              <div className="json-mode-toggle" role="group" aria-label={t.LOAD_FROM_JSON}>
                 <button
                   type="button"
                   className={'json-mode-option' + (jsonLoadMode === 'text' ? ' active' : '')}
                   onClick={() => onJsonModeChange('text')}
                   aria-pressed={jsonLoadMode === 'text'}
                 >
-                  {t.typeJson}
+                  {t.TYPE_JSON}
                 </button>
                 <button
                   type="button"
@@ -246,7 +255,7 @@ export function CardLoaderModal({
                   onClick={() => onJsonModeChange(jsonLoadMode === 'file' ? 'text' : 'file')}
                   role="switch"
                   aria-checked={jsonLoadMode === 'file'}
-                  aria-label={jsonLoadMode === 'text' ? t.importJson : t.typeJson}
+                  aria-label={jsonLoadMode === 'text' ? t.IMPORT_JSON : t.TYPE_JSON}
                 >
                   <span aria-hidden="true" />
                 </button>
@@ -256,7 +265,7 @@ export function CardLoaderModal({
                   onClick={() => onJsonModeChange('file')}
                   aria-pressed={jsonLoadMode === 'file'}
                 >
-                  {t.importJson}
+                  {t.IMPORT_JSON}
                 </button>
               </div>
 
@@ -268,8 +277,8 @@ export function CardLoaderModal({
                     onClick={() => fileRef.current?.click()}
                   >
                     <span aria-hidden="true">JSON</span>
-                    <strong>{t.chooseJsonFile}</strong>
-                    <small>{t.chooseJsonFileHint}</small>
+                    <strong>{t.CHOOSE_JSON_FILE}</strong>
+                    <small>{t.CHOOSE_JSON_FILE_HINT}</small>
                   </button>
                   <input
                     ref={fileRef}
@@ -283,33 +292,40 @@ export function CardLoaderModal({
                 <div className="modal-json-editor">
                   {imageDetections.length > 0 && (
                     <div className="image-detection" role="status">
-                      <strong>{t.imagesDetected(imageDetections.length)}</strong>
-                      <span>{t.imageDetectedHint}</span>
+                      <strong>
+                        {formatMessage(
+                          imageDetections.length === 1
+                            ? t.IMAGES_DETECTED_ONE
+                            : t.IMAGES_DETECTED_OTHER,
+                          { count: imageDetections.length },
+                        )}
+                      </strong>
+                      <span>{t.IMAGE_DETECTED_HINT}</span>
                     </div>
                   )}
                   <div className="json-editor-columns">
                     <div className="json-input-column">
-                      <label htmlFor="cards-json-text">{t.pasteJsonLabel}</label>
+                      <label htmlFor="cards-json-text">{t.PASTE_JSON_LABEL}</label>
                       <textarea
                         id="cards-json-text"
                         value={cardsJsonInput}
                         onChange={(event) => onCardsJsonChange(event.target.value)}
-                        placeholder={t.pasteJsonLabel}
+                        placeholder={t.PASTE_JSON_LABEL}
                         aria-describedby="cards-json-hint"
                         spellCheck="false"
                       />
                     </div>
                     <div className="json-example-column">
-                      <strong>{t.jsonExampleLabel}</strong>
-                      <section className="json-example-block" aria-label={t.jsonExampleLabel}>
+                      <strong>{t.JSON_EXAMPLE_LABEL}</strong>
+                      <section className="json-example-block" aria-label={t.JSON_EXAMPLE_LABEL}>
                         <pre>{cardsJsonExample}</pre>
                       </section>
                     </div>
                   </div>
                   <div className="modal-json-actions">
-                    <span id="cards-json-hint">{t.pasteJsonHint}</span>
+                    <span id="cards-json-hint">{t.PASTE_JSON_HINT}</span>
                     <button type="button" onClick={onLoadJsonText}>
-                      {t.loadTextJson}
+                      {t.LOAD_TEXT_JSON}
                     </button>
                   </div>
                 </div>
@@ -327,7 +343,7 @@ export function CardLoaderModal({
         {canClose && (
           <footer className="loader-footer">
             <button type="button" onClick={onClose}>
-              ← {t.back}
+              ← {t.BACK}
             </button>
           </footer>
         )}

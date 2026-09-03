@@ -13,7 +13,7 @@ import { formatCardsJson } from './src/card-json';
 import { getCards, hasBingo, isNumberOnCards } from './src/domain';
 import { recognizeCardImage } from './src/ocr';
 import { readSavedGame, readSavedLocale, saveGame, saveLocale } from './src/storage';
-import { translations } from './src/translations';
+import { formatMessage, translations } from './src/i18n';
 import type {
   BingoCard,
   ImageDetection,
@@ -99,7 +99,7 @@ export default function BingoClient() {
     try {
       saveGame(cardsToSave, numbersToSave);
     } catch {
-      setMarkerNotice({ type: 'error', text: t.storageError });
+      setMarkerNotice({ type: 'error', text: t.STORAGE_ERROR });
     }
   }
 
@@ -130,7 +130,13 @@ export default function BingoClient() {
     setCards(importedCards);
     setCalledNumbers(emptyCalledNumbers);
     persistGame(importedCards, emptyCalledNumbers);
-    setMarkerNotice({ type: 'info', text: t.importSuccess(importedCards.length) });
+    setMarkerNotice({
+      type: 'info',
+      text: formatMessage(
+        importedCards.length === 1 ? t.IMPORT_SUCCESS_ONE : t.IMPORT_SUCCESS_OTHER,
+        { count: importedCards.length },
+      ),
+    });
     setLoaderNotice(null);
     setImageDetections([]);
     setDetectedImageCards([]);
@@ -141,13 +147,13 @@ export default function BingoClient() {
   function markNumber(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canMark) {
-      setMarkerNotice({ type: 'error', text: t.loadBeforeMarking });
+      setMarkerNotice({ type: 'error', text: t.LOAD_BEFORE_MARKING });
       return;
     }
 
     const parsed = Number(numberInput);
     if (!numberInput.trim() || !Number.isInteger(parsed) || parsed < 1 || parsed > 9999) {
-      setMarkerNotice({ type: 'error', text: t.invalidNumber });
+      setMarkerNotice({ type: 'error', text: t.INVALID_NUMBER });
       inputRef.current?.focus();
       return;
     }
@@ -157,7 +163,9 @@ export default function BingoClient() {
     setCalledNumbers(next);
     setNumberInput('');
     setMarkerNotice(
-      isNumberOnCards(activeCards, parsed) ? null : { type: 'info', text: t.absentNumber(parsed) },
+      isNumberOnCards(activeCards, parsed)
+        ? null
+        : { type: 'info', text: formatMessage(t.ABSENT_NUMBER, { number: parsed }) },
     );
     persistGame(activeCards, next);
     inputRef.current?.focus();
@@ -167,7 +175,7 @@ export default function BingoClient() {
     const next = new Set(calledNumbers);
     next.delete(number);
     setCalledNumbers(next);
-    setMarkerNotice({ type: 'info', text: t.markRemoved(number) });
+    setMarkerNotice({ type: 'info', text: formatMessage(t.MARK_REMOVED, { number }) });
     persistGame(activeCards, next);
   }
 
@@ -193,7 +201,7 @@ export default function BingoClient() {
     try {
       importCards(JSON5.parse(await file.text()) as unknown);
     } catch {
-      setLoaderNotice({ type: 'error', text: t.invalidJson });
+      setLoaderNotice({ type: 'error', text: t.INVALID_JSON });
     } finally {
       event.target.value = '';
       inputRef.current?.focus();
@@ -202,7 +210,7 @@ export default function BingoClient() {
 
   function loadJsonText() {
     if (!cardsJsonInput.trim()) {
-      setLoaderNotice({ type: 'error', text: t.emptyTextJson });
+      setLoaderNotice({ type: 'error', text: t.EMPTY_TEXT_JSON });
       return;
     }
 
@@ -212,7 +220,7 @@ export default function BingoClient() {
       setImageDetections([]);
       setDetectedImageCards([]);
     } catch {
-      setLoaderNotice({ type: 'error', text: t.invalidJson });
+      setLoaderNotice({ type: 'error', text: t.INVALID_JSON });
     }
     inputRef.current?.focus();
   }
@@ -229,7 +237,7 @@ export default function BingoClient() {
     if (!filesToProcess.length) {
       setLoaderNotice({
         type: 'error',
-        text: availableSlots === 0 ? t.imageLimitReached : t.invalidImageFiles,
+        text: availableSlots === 0 ? t.IMAGE_LIMIT_REACHED : t.INVALID_IMAGE_FILES,
       });
       return;
     }
@@ -274,9 +282,9 @@ export default function BingoClient() {
     setImageProgress(null);
 
     if (failedImages > 0) {
-      setLoaderNotice({ type: 'error', text: t.imageError });
+      setLoaderNotice({ type: 'error', text: t.IMAGE_ERROR });
     } else if (imageFiles.length > filesToProcess.length) {
-      setLoaderNotice({ type: 'error', text: t.imageLimitReached });
+      setLoaderNotice({ type: 'error', text: t.IMAGE_LIMIT_REACHED });
     }
   }
 
@@ -318,7 +326,7 @@ export default function BingoClient() {
         />
         <div className="sidebar-column">
           <div className="sidebar-summary">
-            <span>{t.calledCount(calledNumbers.size)}</span>
+            <span>{formatMessage(t.CALLED_COUNT, { count: calledNumbers.size })}</span>
           </div>
           <MarkerSidebar
             canMark={canMark}

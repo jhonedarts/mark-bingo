@@ -1,8 +1,13 @@
 import Image from 'next/image';
 import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import './top-bar.css';
-import { localeNames, localeOrder, localeShortNames } from '../translations';
-import type { Locale, Translation } from '../types';
+import {
+  localeNames,
+  localeOrder,
+  localeShortNames,
+  type Translation,
+} from '../i18n';
+import type { Locale } from '../types';
 
 type TopBarProps = {
   activeCardCount: number;
@@ -81,7 +86,7 @@ export function TopBar({
 
   return (
     <header className="topbar">
-      <div className="brand" aria-label={t.brandLabel}>
+      <div className="brand" aria-label={t.BRAND_LABEL}>
         <Image
           className="brand-mark"
           src="/favicon.svg?v=2"
@@ -95,7 +100,7 @@ export function TopBar({
       <div className="topbar-actions">
         <div className="topbar-meta">
           <span className="live-dot" aria-hidden="true" />
-          <span>{t.cardsInPlay}</span>
+          <span>{t.CARDS_IN_PLAY}</span>
           <strong>{activeCardCount.toString().padStart(2, '0')}</strong>
         </div>
         <div className="language-picker" ref={languagePickerRef}>
@@ -104,8 +109,8 @@ export function TopBar({
             type="button"
             className="language-switch"
             onClick={() => setIsLanguageMenuOpen((isOpen) => !isOpen)}
-            aria-label={t.selectLanguage}
-            title={t.selectLanguage}
+            aria-label={t.SELECT_LANGUAGE}
+            title={t.SELECT_LANGUAGE}
             aria-haspopup="menu"
             aria-expanded={isLanguageMenuOpen}
             aria-controls="language-menu"
@@ -120,7 +125,7 @@ export function TopBar({
               id="language-menu"
               className="language-menu"
               role="menu"
-              aria-label={t.selectLanguage}
+              aria-label={t.SELECT_LANGUAGE}
               onKeyDown={navigateLanguageMenu}
             >
               {localeOrder.map((option) => {

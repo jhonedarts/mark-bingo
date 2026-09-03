@@ -1,6 +1,7 @@
 import './marker-sidebar.css';
 import type { FormEventHandler, RefObject } from 'react';
-import type { Notice, Translation } from '../types';
+import { formatMessage, type Translation } from '../i18n';
+import type { Notice } from '../types';
 
 type MarkerSidebarProps = {
   canMark: boolean;
@@ -44,15 +45,15 @@ export function MarkerSidebar({
   translation: t,
 }: MarkerSidebarProps) {
   return (
-    <aside className="control-panel" aria-label={t.controlPanelLabel}>
+    <aside className="control-panel" aria-label={t.CONTROL_PANEL_LABEL}>
       <div className="control-title">
-        <span>{t.marker}</span>
-        <h2>{t.whichNumber}</h2>
-        <p>{canMark ? t.markInstruction : t.loadInstruction}</p>
+        <span>{t.MARKER}</span>
+        <h2>{t.WHICH_NUMBER}</h2>
+        <p>{canMark ? t.MARK_INSTRUCTION : t.LOAD_INSTRUCTION}</p>
       </div>
 
       <form onSubmit={onMarkNumber} className="number-form">
-        <label htmlFor="bingo-number">{t.calledNumber}</label>
+        <label htmlFor="bingo-number">{t.CALLED_NUMBER}</label>
         <div className="input-row">
           <input
             ref={inputRef}
@@ -70,10 +71,10 @@ export function MarkerSidebar({
           <button
             type="submit"
             className="confirm-button"
-            aria-label={t.confirmNumber}
+            aria-label={t.CONFIRM_NUMBER}
             disabled={!canMark}
           >
-            <span>{t.mark}</span>
+            <span>{t.MARK}</span>
             <b aria-hidden="true">→</b>
           </button>
         </div>
@@ -87,21 +88,21 @@ export function MarkerSidebar({
 
       <div className="recent-section">
         <div className="recent-heading">
-          <h3>{t.called}</h3>
+          <h3>{t.CALLED}</h3>
           <div className="recent-controls">
             <button
               type="button"
               onClick={onToggleHistory}
               disabled={!sortedCalledNumbers.length}
             >
-              {showHistory ? t.collapse : t.showAll}
+              {showHistory ? t.COLLAPSE : t.SHOW_ALL}
             </button>
             <button
               type="button"
               onClick={onToggleEditing}
               disabled={!sortedCalledNumbers.length}
             >
-              {editingHistory ? t.finishEditing : t.edit}
+              {editingHistory ? t.FINISH_EDITING : t.EDIT}
             </button>
           </div>
         </div>
@@ -124,7 +125,9 @@ export function MarkerSidebar({
                 onClick={() => onRemoveCalledNumber(number)}
                 disabled={!editingHistory}
                 aria-label={
-                  editingHistory ? t.removeCalledNumber(number) : t.calledNumber + ' ' + number
+                  editingHistory
+                    ? formatMessage(t.REMOVE_CALLED_NUMBER, { number })
+                    : t.CALLED_NUMBER + ' ' + number
                 }
               >
                 {number}
@@ -133,26 +136,26 @@ export function MarkerSidebar({
             ))}
           </div>
         ) : (
-          <p className="empty-history">{t.noCalledNumbers}</p>
+          <p className="empty-history">{t.NO_CALLED_NUMBERS}</p>
         )}
       </div>
 
       <div className="panel-actions">
         <button type="button" onClick={onUndoLast} disabled={!calledNumberCount}>
-          {t.undoLast}
+          {t.UNDO_LAST}
         </button>
         <button type="button" onClick={onClearMarks} disabled={!calledNumberCount}>
-          {t.clearMarks}
+          {t.CLEAR_MARKS}
         </button>
       </div>
 
       <div className="json-loader">
         <div>
-          <strong>{canMark ? t.otherCards : t.letsStart}</strong>
-          <span>{canMark ? t.savedForOneDay : t.noCardsHint}</span>
+          <strong>{canMark ? t.OTHER_CARDS : t.LETS_START}</strong>
+          <span>{canMark ? t.SAVED_FOR_ONE_DAY : t.NO_CARDS_HINT}</span>
         </div>
         <button type="button" onClick={onOpenLoader}>
-          {t.openLoader}
+          {t.OPEN_LOADER}
         </button>
       </div>
     </aside>

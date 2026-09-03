@@ -1,5 +1,6 @@
 import './bingo-alert.css';
-import type { BingoCard, Translation } from '../types';
+import { formatMessage, type Translation } from '../i18n';
+import type { BingoCard } from '../types';
 
 type BingoAlertProps = {
   winners: BingoCard[];
@@ -16,8 +17,8 @@ export function BingoAlert({ winners, translation: t }: BingoAlertProps) {
         <strong>BINGO!</strong>
         <small>
           {winners.length === 1
-            ? t.cardComplete(winners[0].title)
-            : t.cardsComplete(winners.length)}
+            ? formatMessage(t.CARD_COMPLETE, { title: winners[0].title })
+            : formatMessage(t.CARDS_COMPLETE_OTHER, { count: winners.length })}
         </small>
       </div>
       <span aria-hidden="true">★</span>

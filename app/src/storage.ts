@@ -1,5 +1,5 @@
 import { isValidCard, isValidMarkedNumber } from './domain';
-import { localeOrder } from './translations';
+import { localeOrder } from './i18n';
 import type { BingoCard, Locale } from './types';
 
 type SavedGame = {
