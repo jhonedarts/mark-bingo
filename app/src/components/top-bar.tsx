@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import './top-bar.css';
 import { localeNames, localeShortNames } from '../translations';
 import type { Locale, Translation } from '../types';
@@ -22,9 +23,14 @@ export function TopBar({
   return (
     <header className="topbar">
       <div className="brand" aria-label={t.brandLabel}>
-        <span className="brand-mark" aria-hidden="true">
-          <i /><i /><i /><i /><i /><i />
-        </span>
+        <Image
+          className="brand-mark"
+          src="/favicon.svg?v=2"
+          alt=""
+          width={25}
+          height={25}
+          aria-hidden="true"
+        />
         <span className="brand-name">MARCA BINGO</span>
       </div>
       <div className="topbar-actions">

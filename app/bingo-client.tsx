@@ -3,6 +3,7 @@
 import './bingo-client.css';
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import JSON5 from 'json5';
+import { AuthorWatermark } from './src/components/author-watermark';
 import { BingoAlert } from './src/components/bingo-alert';
 import { CardLoaderModal } from './src/components/card-loader-modal';
 import { CardsPanel } from './src/components/cards-panel';
@@ -244,40 +245,47 @@ export default function BingoClient() {
 
       <BingoAlert winners={winners} translation={t} />
 
-      <div className="workspace">
+      <div className={'workspace' + (activeCards.length <= 1 ? ' compact-workspace' : '')}>
         <CardsPanel
           cards={cards}
           calledNumbers={calledNumbers}
           onOpenLoader={() => openLoader('image')}
           translation={t}
         />
-        <MarkerSidebar
-          canMark={canMark}
-          calledNumberCount={calledNumbers.size}
-          editingHistory={editingHistory}
-          inputRef={inputRef}
-          isNumberOnAnyCard={(number) => isNumberOnCards(activeCards, number)}
-          notice={markerNotice}
-          numberInput={numberInput}
-          onClearMarks={clearMarks}
-          onInputChange={(value) => {
-            setNumberInput(value);
-            setMarkerNotice(null);
-          }}
-          onMarkNumber={markNumber}
-          onOpenLoader={() => openLoader('image')}
-          onRemoveCalledNumber={removeCalledNumber}
-          onToggleEditing={() => {
-            setEditingHistory((value) => !value);
-            setShowHistory(true);
-          }}
-          onToggleHistory={() => setShowHistory((value) => !value)}
-          onUndoLast={undoLast}
-          showHistory={showHistory}
-          sortedCalledNumbers={sortedCalledNumbers}
-          translation={t}
-        />
+        <div className="sidebar-column">
+          <div className="sidebar-summary">
+            <span>{t.calledCount(calledNumbers.size)}</span>
+          </div>
+          <MarkerSidebar
+            canMark={canMark}
+            calledNumberCount={calledNumbers.size}
+            editingHistory={editingHistory}
+            inputRef={inputRef}
+            isNumberOnAnyCard={(number) => isNumberOnCards(activeCards, number)}
+            notice={markerNotice}
+            numberInput={numberInput}
+            onClearMarks={clearMarks}
+            onInputChange={(value) => {
+              setNumberInput(value);
+              setMarkerNotice(null);
+            }}
+            onMarkNumber={markNumber}
+            onOpenLoader={() => openLoader('image')}
+            onRemoveCalledNumber={removeCalledNumber}
+            onToggleEditing={() => {
+              setEditingHistory((value) => !value);
+              setShowHistory(true);
+            }}
+            onToggleHistory={() => setShowHistory((value) => !value)}
+            onUndoLast={undoLast}
+            showHistory={showHistory}
+            sortedCalledNumbers={sortedCalledNumbers}
+            translation={t}
+          />
+        </div>
       </div>
+
+      <AuthorWatermark />
 
       {showLoader && (
         <CardLoaderModal

@@ -9,6 +9,7 @@
   min-height: 55px;
   justify-content: space-between;
   margin-bottom: 20px;
+  margin-inline: 4px;
 }
 
 .section-heading p {
@@ -23,16 +24,6 @@
   margin: 0;
   font-size: clamp(1.6rem, 2.5vw, 2.25rem);
   letter-spacing: -0.04em;
-}
-
-.section-heading > span {
-  padding: 7px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.58);
-  font-size: 0.73rem;
-  font-weight: 650;
 }
 
 .cards-grid {
@@ -258,15 +249,6 @@
 }
 
 @media (max-width: 730px) {
-  .section-heading {
-    align-items: flex-end;
-  }
-
-  .section-heading > span {
-    max-width: 104px;
-    text-align: center;
-  }
-
   .cards-grid:not(.cards-1) {
     grid-template-columns: 1fr;
   }

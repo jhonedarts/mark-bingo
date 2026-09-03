@@ -24,7 +24,6 @@ export function CardsPanel({
           <p>{t.liveTracking}</p>
           <h1>{t.yourCards}</h1>
         </div>
-        <span>{t.calledCount(calledNumbers.size)}</span>
       </div>
 
       {cards === null ? (

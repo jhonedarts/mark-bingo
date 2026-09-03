@@ -1,0 +1,62 @@
+.author-watermark {
+  position: fixed;
+  right: 18px;
+  bottom: 14px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(67, 62, 86, 0.58);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.author-watermark a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #777286;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.author-watermark strong {
+  color: currentColor;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.linkedin-mark {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  transition: filter 160ms ease;
+}
+
+.author-watermark a:hover,
+.author-watermark a:focus-visible {
+  color: #0a66c2;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.author-watermark a:hover strong,
+.author-watermark a:focus-visible strong {
+  background: linear-gradient(135deg, var(--pink), #8241ed);
+  background-clip: text;
+  color: transparent;
+}
+
+.author-watermark a:focus-visible {
+  border-radius: 3px;
+  box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.2);
+}
+
+@media (max-width: 730px) {
+  .author-watermark {
+    right: 10px;
+    bottom: 8px;
+  }
+}

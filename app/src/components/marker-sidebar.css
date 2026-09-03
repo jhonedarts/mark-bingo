@@ -1,7 +1,6 @@
 .control-panel {
   position: sticky;
   top: 22px;
-  margin-top: 90px;
   padding: 24px;
   border-radius: 22px;
   color: white;
@@ -308,7 +307,6 @@
 @media (max-width: 1120px) {
   .control-panel {
     position: static;
-    margin-top: 0;
     display: grid;
     grid-template-columns: minmax(220px, 0.8fr) minmax(330px, 1.2fr);
     gap: 20px 28px;

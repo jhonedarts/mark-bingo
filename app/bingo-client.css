@@ -7,13 +7,45 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(270px, 324px);
-  gap: clamp(22px, 2.7vw, 43px);
+  gap: 24px;
   align-items: start;
   padding: 41px 0 58px;
 }
 
+.workspace.compact-workspace {
+  width: min(906px, calc(100% - clamp(29px, 5.4vw, 86px)));
+  grid-template-columns: minmax(0, 558px) minmax(270px, 324px);
+}
+
+.sidebar-column {
+  min-width: 0;
+}
+
+.sidebar-summary {
+  min-height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 20px 4px;
+}
+
+.sidebar-summary span {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.58);
+  font-size: 0.73rem;
+  font-weight: 650;
+}
+
 @media (max-width: 1120px) {
   .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace.compact-workspace {
+    width: min(100% - 29px, 906px);
     grid-template-columns: 1fr;
   }
 }

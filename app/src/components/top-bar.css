@@ -26,28 +26,10 @@
 }
 
 .brand-mark {
-  width: 38px;
+  width: 25px;
   height: 25px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  align-content: center;
-  gap: 4px;
-}
-
-.brand-mark i {
-  height: 4px;
   display: block;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--pink), #a93fd7);
-}
-
-.brand-mark i:nth-child(2),
-.brand-mark i:nth-child(4) {
-  transform: translateY(3px);
-}
-
-.brand-mark i:nth-child(5) {
-  transform: translateY(6px);
+  flex: 0 0 auto;
 }
 
 .topbar-actions {
