@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import type { ChangeEventHandler, DragEvent, RefObject } from 'react';
 import type {
   ImageDetection,
+  ImageProgress,
   JsonLoadMode,
   LoadMode,
   Notice,
@@ -28,19 +29,21 @@ type CardLoaderModalProps = {
   canClose: boolean;
   cardsJsonInput: string;
   fileRef: RefObject<HTMLInputElement | null>;
-  imageDetection: ImageDetection | null;
-  imageProgress: number | null;
+  imageDetections: ImageDetection[];
+  imageProgress: ImageProgress | null;
   imageRef: RefObject<HTMLInputElement | null>;
   jsonLoadMode: JsonLoadMode;
   loadMode: LoadMode;
   notice: Notice;
   onCardsJsonChange: (value: string) => void;
   onClose: () => void;
-  onLoadImageFile: (file: File) => Promise<void>;
+  onLoadImageFiles: (files: File[]) => Promise<void>;
   onLoadJsonFile: ChangeEventHandler<HTMLInputElement>;
   onLoadJsonText: () => void;
   onJsonModeChange: (mode: JsonLoadMode) => void;
   onModeChange: (mode: LoadMode) => void;
+  onRemoveImage: (index: number) => void;
+  onReviewImages: () => void;
   translation: Translation;
 };
 
@@ -48,7 +51,7 @@ export function CardLoaderModal({
   canClose,
   cardsJsonInput,
   fileRef,
-  imageDetection,
+  imageDetections,
   imageProgress,
   imageRef,
   jsonLoadMode,
@@ -56,11 +59,13 @@ export function CardLoaderModal({
   notice,
   onCardsJsonChange,
   onClose,
-  onLoadImageFile,
+  onLoadImageFiles,
   onLoadJsonFile,
   onLoadJsonText,
   onJsonModeChange,
   onModeChange,
+  onRemoveImage,
+  onReviewImages,
   translation: t,
 }: CardLoaderModalProps) {
   const [isDraggingImage, setIsDraggingImage] = useState(false);
@@ -92,8 +97,8 @@ export function CardLoaderModal({
     imageDragDepth.current = 0;
     setIsDraggingImage(false);
 
-    const file = event.dataTransfer.files[0];
-    if (file) void onLoadImageFile(file);
+    const files = Array.from(event.dataTransfer.files);
+    if (files.length) void onLoadImageFiles(files);
   }
 
   return (
@@ -130,7 +135,11 @@ export function CardLoaderModal({
 
         <div className="loader-content">
           {loadMode === 'image' && (
-            <div className="upload-pane">
+            <div
+              className={
+                'upload-pane image-upload-pane' + (imageDetections.length ? ' has-images' : '')
+              }
+            >
               <button
                 type="button"
                 className={'upload-target image-target' + (isDraggingImage ? ' is-dragging' : '')}
@@ -139,16 +148,26 @@ export function CardLoaderModal({
                 onDragLeave={handleImageDragLeave}
                 onDragOver={handleImageDragOver}
                 onDrop={handleImageDrop}
-                disabled={imageProgress !== null}
+                disabled={imageProgress !== null || imageDetections.length >= 4}
               >
                 <span aria-hidden="true">▦</span>
                 <strong>
-                  {imageProgress === null ? t.chooseImage : t.imageProcessing(imageProgress)}
+                  {imageProgress === null
+                    ? imageDetections.length >= 4
+                      ? t.imageLimitHint
+                      : imageDetections.length
+                      ? t.addMoreImages
+                      : t.chooseImage
+                    : t.imageProcessing(
+                        imageProgress.current,
+                        imageProgress.total,
+                        imageProgress.percent,
+                      )}
                 </strong>
-                <small>{t.chooseImageHint}</small>
+                <small>{imageProgress?.fileName ?? t.chooseImageHint}</small>
                 {imageProgress !== null && (
                   <i className="ocr-progress" aria-hidden="true">
-                    <b style={{ width: imageProgress + '%' }} />
+                    <b style={{ width: imageProgress.percent + '%' }} />
                   </i>
                 )}
               </button>
@@ -156,14 +175,57 @@ export function CardLoaderModal({
                 ref={imageRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
+                multiple
                 onChange={(event) => {
-                  const file = event.currentTarget.files?.[0];
-                  if (file) void onLoadImageFile(file);
+                  const files = Array.from(event.currentTarget.files ?? []);
+                  if (files.length) void onLoadImageFiles(files);
                   event.currentTarget.value = '';
                 }}
                 hidden
               />
+
+              {imageDetections.length > 0 && (
+                <section className="image-queue" aria-label={t.imagesReady(imageDetections.length)}>
+                  <div className="image-queue-heading">
+                    <strong>{t.imagesReady(imageDetections.length)}</strong>
+                    <span>{t.imageLimitHint}</span>
+                  </div>
+                  <ul>
+                    {imageDetections.map((detection, index) => (
+                      <li key={detection.fileName + '-' + index}>
+                        <span className="image-queue-index" aria-hidden="true">
+                          {index + 1}
+                        </span>
+                        <div>
+                          <strong>{detection.fileName}</strong>
+                          <span>
+                            {t.card} {detection.title} ·{' '}
+                            {t.imageDetected(detection.rows, detection.columns)}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onRemoveImage(index)}
+                          disabled={imageProgress !== null}
+                          aria-label={t.removeImage(detection.fileName)}
+                          title={t.removeImage(detection.fileName)}
+                        >
+                          ×
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    className="review-images-button"
+                    onClick={onReviewImages}
+                    disabled={imageProgress !== null}
+                  >
+                    {t.reviewImages}
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </section>
+              )}
             </div>
           )}
 
@@ -219,11 +281,9 @@ export function CardLoaderModal({
                 </div>
               ) : (
                 <div className="modal-json-editor">
-                  {imageDetection && (
+                  {imageDetections.length > 0 && (
                     <div className="image-detection" role="status">
-                      <strong>
-                        {t.imageDetected(imageDetection.rows, imageDetection.columns)}
-                      </strong>
+                      <strong>{t.imagesDetected(imageDetections.length)}</strong>
                       <span>{t.imageDetectedHint}</span>
                     </div>
                   )}

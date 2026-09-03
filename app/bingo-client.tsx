@@ -17,6 +17,7 @@ import { translations } from './src/translations';
 import type {
   BingoCard,
   ImageDetection,
+  ImageProgress,
   JsonLoadMode,
   LoadMode,
   Locale,
@@ -36,8 +37,9 @@ export default function BingoClient() {
   const [showLoader, setShowLoader] = useState(false);
   const [loadMode, setLoadMode] = useState<LoadMode>('image');
   const [jsonLoadMode, setJsonLoadMode] = useState<JsonLoadMode>('text');
-  const [imageProgress, setImageProgress] = useState<number | null>(null);
-  const [imageDetection, setImageDetection] = useState<ImageDetection | null>(null);
+  const [imageProgress, setImageProgress] = useState<ImageProgress | null>(null);
+  const [imageDetections, setImageDetections] = useState<ImageDetection[]>([]);
+  const [detectedImageCards, setDetectedImageCards] = useState<BingoCard[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLInputElement>(null);
@@ -113,7 +115,9 @@ export default function BingoClient() {
   function openLoader(mode: LoadMode = 'image') {
     setLoadMode(mode);
     setJsonLoadMode('text');
-    setImageDetection(null);
+    setImageDetections([]);
+    setDetectedImageCards([]);
+    setImageProgress(null);
     setLoaderNotice(null);
     setShowLoader(true);
   }
@@ -128,6 +132,8 @@ export default function BingoClient() {
     persistGame(importedCards, emptyCalledNumbers);
     setMarkerNotice({ type: 'info', text: t.importSuccess(importedCards.length) });
     setLoaderNotice(null);
+    setImageDetections([]);
+    setDetectedImageCards([]);
     setEditingHistory(false);
     setShowLoader(false);
   }
@@ -203,33 +209,93 @@ export default function BingoClient() {
     try {
       importCards(JSON5.parse(cardsJsonInput) as unknown);
       setCardsJsonInput('');
-      setImageDetection(null);
+      setImageDetections([]);
+      setDetectedImageCards([]);
     } catch {
       setLoaderNotice({ type: 'error', text: t.invalidJson });
     }
     inputRef.current?.focus();
   }
 
-  async function loadImage(file: File) {
-    setImageProgress(0);
-    setImageDetection(null);
+  async function loadImages(files: File[]) {
+    if (imageProgress !== null) return;
+
+    const imageFiles = files.filter(
+      (file) => file.type.startsWith('image/') || /\.(avif|gif|heic|jpe?g|png|webp)$/i.test(file.name),
+    );
+    const availableSlots = Math.max(0, 4 - detectedImageCards.length);
+    const filesToProcess = imageFiles.slice(0, availableSlots);
+
+    if (!filesToProcess.length) {
+      setLoaderNotice({
+        type: 'error',
+        text: availableSlots === 0 ? t.imageLimitReached : t.invalidImageFiles,
+      });
+      return;
+    }
+
+    const nextCards = [...detectedImageCards];
+    const nextDetections = [...imageDetections];
+    let failedImages = 0;
     setLoaderNotice(null);
 
-    try {
-      const detected = await recognizeCardImage(file, setImageProgress);
-      setCardsJsonInput(formatCardsJson([detected.card]));
-      setImageDetection({
-        title: detected.card.title,
-        rows: detected.rows,
-        columns: detected.columns,
+    for (const [index, file] of filesToProcess.entries()) {
+      setImageProgress({
+        current: index + 1,
+        total: filesToProcess.length,
+        percent: 0,
+        fileName: file.name,
       });
-      setLoadMode('json');
-      setJsonLoadMode('text');
-    } catch {
-      setLoaderNotice({ type: 'error', text: t.imageError });
-    } finally {
-      setImageProgress(null);
+
+      try {
+        const detected = await recognizeCardImage(file, (percent) => {
+          setImageProgress({
+            current: index + 1,
+            total: filesToProcess.length,
+            percent,
+            fileName: file.name,
+          });
+        });
+        nextCards.push(detected.card);
+        nextDetections.push({
+          fileName: file.name,
+          title: detected.card.title,
+          rows: detected.rows,
+          columns: detected.columns,
+        });
+        setDetectedImageCards([...nextCards]);
+        setImageDetections([...nextDetections]);
+        setCardsJsonInput(formatCardsJson(nextCards));
+      } catch {
+        failedImages += 1;
+      }
     }
+
+    setImageProgress(null);
+
+    if (failedImages > 0) {
+      setLoaderNotice({ type: 'error', text: t.imageError });
+    } else if (imageFiles.length > filesToProcess.length) {
+      setLoaderNotice({ type: 'error', text: t.imageLimitReached });
+    }
+  }
+
+  function removeDetectedImage(index: number) {
+    const nextCards = detectedImageCards.filter((_, cardIndex) => cardIndex !== index);
+    setDetectedImageCards(nextCards);
+    setImageDetections((detections) =>
+      detections.filter((_, detectionIndex) => detectionIndex !== index),
+    );
+    setCardsJsonInput(nextCards.length ? formatCardsJson(nextCards) : '');
+    setLoaderNotice(null);
+  }
+
+  function reviewDetectedImages() {
+    if (!detectedImageCards.length || imageProgress !== null) return;
+    setCardsJsonInput(formatCardsJson(detectedImageCards));
+    setLoadMode('json');
+    setJsonLoadMode('text');
+    setLoaderNotice(null);
   }
 
   return (
@@ -290,7 +356,7 @@ export default function BingoClient() {
           canClose={canMark}
           cardsJsonInput={cardsJsonInput}
           fileRef={fileRef}
-          imageDetection={imageDetection}
+          imageDetections={imageDetections}
           imageProgress={imageProgress}
           imageRef={imageRef}
           jsonLoadMode={jsonLoadMode}
@@ -301,11 +367,13 @@ export default function BingoClient() {
             setLoaderNotice(null);
           }}
           onClose={() => setShowLoader(false)}
-          onLoadImageFile={loadImage}
+          onLoadImageFiles={loadImages}
           onLoadJsonFile={loadJsonFile}
           onLoadJsonText={loadJsonText}
           onJsonModeChange={setJsonLoadMode}
           onModeChange={setLoadMode}
+          onRemoveImage={removeDetectedImage}
+          onReviewImages={reviewDetectedImages}
           translation={t}
         />
       )}

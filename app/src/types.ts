@@ -14,9 +14,17 @@ export type LoadMode = 'image' | 'json';
 export type JsonLoadMode = 'file' | 'text';
 
 export type ImageDetection = {
+  fileName: string;
   title: string;
   rows: number;
   columns: number;
+};
+
+export type ImageProgress = {
+  current: number;
+  total: number;
+  percent: number;
+  fileName: string;
 };
 
 export type Translation = {
@@ -74,14 +82,22 @@ export type Translation = {
   chooseJsonFile: string;
   chooseJsonFileHint: string;
   chooseImage: string;
+  addMoreImages: string;
   chooseImageHint: string;
+  imageLimitHint: string;
+  imageLimitReached: string;
+  invalidImageFiles: string;
+  imagesReady: (count: number) => string;
+  removeImage: (fileName: string) => string;
+  reviewImages: string;
   pasteJsonLabel: string;
   pasteJsonHint: string;
   jsonExampleLabel: string;
   loadTextJson: string;
   back: string;
   close: string;
-  imageProcessing: (progress: number) => string;
+  imageProcessing: (current: number, total: number, progress: number) => string;
+  imagesDetected: (count: number) => string;
   imageDetected: (rows: number, columns: number) => string;
   imageDetectedHint: string;
   imageError: string;
