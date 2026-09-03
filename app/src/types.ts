@@ -22,7 +22,7 @@ export type ImageDetection = {
 export type Translation = {
   brandLabel: string;
   cardsInPlay: string;
-  changeLanguage: (language: string) => string;
+  selectLanguage: string;
   cardComplete: (title: string) => string;
   cardsComplete: (count: number) => string;
   cardsPanelLabel: string;

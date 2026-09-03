@@ -18,7 +18,7 @@ export const translations: Record<Locale, Translation> = {
   'pt-BR': {
     brandLabel: 'Marcador de bingo',
     cardsInPlay: 'Cartelas em jogo',
-    changeLanguage: (language) => 'Alterar idioma para ' + language,
+    selectLanguage: 'Selecionar idioma',
     cardComplete: (title) => 'Cartela ' + title + ' completa',
     cardsComplete: (count) => count + ' cartelas completas',
     cardsPanelLabel: 'Cartelas de bingo',
@@ -91,7 +91,7 @@ export const translations: Record<Locale, Translation> = {
   es: {
     brandLabel: 'Marcador de bingo',
     cardsInPlay: 'Cartones en juego',
-    changeLanguage: (language) => 'Cambiar idioma a ' + language,
+    selectLanguage: 'Seleccionar idioma',
     cardComplete: (title) => 'Cartón ' + title + ' completo',
     cardsComplete: (count) => count + ' cartones completos',
     cardsPanelLabel: 'Cartones de bingo',
@@ -164,7 +164,7 @@ export const translations: Record<Locale, Translation> = {
   en: {
     brandLabel: 'Bingo marker',
     cardsInPlay: 'Cards in play',
-    changeLanguage: (language) => 'Change language to ' + language,
+    selectLanguage: 'Select language',
     cardComplete: (title) => 'Card ' + title + ' complete',
     cardsComplete: (count) => count + ' cards complete',
     cardsPanelLabel: 'Bingo cards',

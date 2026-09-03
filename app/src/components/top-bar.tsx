@@ -1,24 +1,83 @@
 import Image from 'next/image';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import './top-bar.css';
-import { localeNames, localeShortNames } from '../translations';
+import { localeNames, localeOrder, localeShortNames } from '../translations';
 import type { Locale, Translation } from '../types';
 
 type TopBarProps = {
   activeCardCount: number;
   locale: Locale;
-  nextLocale: Locale;
-  onChangeLocale: () => void;
+  onChangeLocale: (locale: Locale) => void;
   translation: Translation;
 };
 
 export function TopBar({
   activeCardCount,
   locale,
-  nextLocale,
   onChangeLocale,
   translation: t,
 }: TopBarProps) {
-  const changeLanguageLabel = t.changeLanguage(localeNames[nextLocale]);
+  const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const languagePickerRef = useRef<HTMLDivElement>(null);
+  const languageButtonRef = useRef<HTMLButtonElement>(null);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isLanguageMenuOpen) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      languageMenuRef.current
+        ?.querySelector<HTMLButtonElement>('[aria-checked="true"]')
+        ?.focus();
+    });
+
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (!languagePickerRef.current?.contains(event.target as Node)) {
+        setIsLanguageMenuOpen(false);
+      }
+    }
+
+    function closeOnEscape(event: globalThis.KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      setIsLanguageMenuOpen(false);
+      languageButtonRef.current?.focus();
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isLanguageMenuOpen]);
+
+  function selectLocale(option: Locale) {
+    onChangeLocale(option);
+    setIsLanguageMenuOpen(false);
+    languageButtonRef.current?.focus();
+  }
+
+  function navigateLanguageMenu(event: KeyboardEvent<HTMLDivElement>) {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+
+    event.preventDefault();
+    const options = Array.from(
+      languageMenuRef.current?.querySelectorAll<HTMLButtonElement>('.language-option') ?? [],
+    );
+    const currentIndex = options.indexOf(document.activeElement as HTMLButtonElement);
+    const nextIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? options.length - 1
+          : event.key === 'ArrowDown'
+            ? (currentIndex + 1) % options.length
+            : (currentIndex - 1 + options.length) % options.length;
+
+    options[nextIndex]?.focus();
+  }
 
   return (
     <header className="topbar">
@@ -39,16 +98,51 @@ export function TopBar({
           <span>{t.cardsInPlay}</span>
           <strong>{activeCardCount.toString().padStart(2, '0')}</strong>
         </div>
-        <button
-          type="button"
-          className="language-switch"
-          onClick={onChangeLocale}
-          aria-label={changeLanguageLabel}
-          title={changeLanguageLabel}
-        >
-          <span aria-hidden="true">◎</span>
-          <strong>{localeShortNames[locale]}</strong>
-        </button>
+        <div className="language-picker" ref={languagePickerRef}>
+          <button
+            ref={languageButtonRef}
+            type="button"
+            className="language-switch"
+            onClick={() => setIsLanguageMenuOpen((isOpen) => !isOpen)}
+            aria-label={t.selectLanguage}
+            title={t.selectLanguage}
+            aria-haspopup="menu"
+            aria-expanded={isLanguageMenuOpen}
+            aria-controls="language-menu"
+          >
+            <span aria-hidden="true">◎</span>
+            <strong>{localeShortNames[locale]}</strong>
+          </button>
+
+          {isLanguageMenuOpen && (
+            <div
+              ref={languageMenuRef}
+              id="language-menu"
+              className="language-menu"
+              role="menu"
+              aria-label={t.selectLanguage}
+              onKeyDown={navigateLanguageMenu}
+            >
+              {localeOrder.map((option) => {
+                const isActive = option === locale;
+                return (
+                  <button
+                    type="button"
+                    className={'language-option' + (isActive ? ' active' : '')}
+                    role="menuitemradio"
+                    aria-checked={isActive}
+                    onClick={() => selectLocale(option)}
+                    key={option}
+                  >
+                    <span>{localeShortNames[option]}</span>
+                    <strong>{localeNames[option]}</strong>
+                    <i aria-hidden="true">{isActive ? '✓' : ''}</i>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

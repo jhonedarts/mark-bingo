@@ -13,7 +13,7 @@ import { formatCardsJson } from './src/card-json';
 import { getCards, hasBingo, isNumberOnCards } from './src/domain';
 import { recognizeCardImage } from './src/ocr';
 import { readSavedGame, readSavedLocale, saveGame, saveLocale } from './src/storage';
-import { localeOrder, translations } from './src/translations';
+import { translations } from './src/translations';
 import type {
   BingoCard,
   ImageDetection,
@@ -47,7 +47,6 @@ export default function BingoClient() {
   const canMark = activeCards.length > 0;
   const winners = activeCards.filter((card) => hasBingo(card, calledNumbers));
   const sortedCalledNumbers = Array.from(calledNumbers).reverse();
-  const nextLocale = localeOrder[(localeOrder.indexOf(locale) + 1) % localeOrder.length];
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -102,7 +101,7 @@ export default function BingoClient() {
     }
   }
 
-  function changeLocale() {
+  function changeLocale(nextLocale: Locale) {
     setLocale(nextLocale);
     try {
       saveLocale(nextLocale);
@@ -238,7 +237,6 @@ export default function BingoClient() {
       <TopBar
         activeCardCount={activeCards.length}
         locale={locale}
-        nextLocale={nextLocale}
         onChangeLocale={changeLocale}
         translation={t}
       />
